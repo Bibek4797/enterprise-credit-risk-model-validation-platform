@@ -1,0 +1,6 @@
+feature,interaction_coef,box_tidwell_pvalue,is_non_linear
+loan_amnt,-3.2e-05,0.0006414469242469565,Yes
+int_rate,-0.260503,7.0648224389024845e-15,Yes
+installment,-0.00189,2.1446418407416254e-09,Yes
+annual_inc,2e-06,0.04793385203085051,Yes
+fico_range_low,0.018213,0.5939038938187406,No

@@ -1,0 +1,1605 @@
+{
+  "source_file": "accepted_2007_to_2018Q4.csv",
+  "rows": 2260701,
+  "columns": 20,
+  "file_size_bytes": 1675133810,
+  "totals": {
+    "funded_amount": 34004208600.0,
+    "loan_amount": 34016115925.0
+  },
+  "averages": {
+    "loan_amnt": 15046.931227849467,
+    "int_rate": 13.092829115111106,
+    "annual_inc": 77992.42868706715,
+    "dti": 18.824196436674097,
+    "fico_mid": 700.5883024398098,
+    "revol_util": 50.33769624670078
+  },
+  "loan_status": {
+    "Fully Paid": 1076751,
+    "Current": 878317,
+    "Charged Off": 268559,
+    "In Grace Period": 8436,
+    "Late (31-120 days)": 21467,
+    "Late (16-30 days)": 4349,
+    "Default": 40,
+    "Missing": 33,
+    "Does not meet the credit policy. Status:Fully Paid": 1988,
+    "Does not meet the credit policy. Status:Charged Off": 761
+  },
+  "groups": {
+    "loan_status": [
+      {
+        "category": "Fully Paid",
+        "loans": 1076751,
+        "default_rate": 0.0,
+        "avg_loan_amount": 14134.37,
+        "avg_income": 77705.95
+      },
+      {
+        "category": "Current",
+        "loans": 878317,
+        "default_rate": 0.0,
+        "avg_loan_amount": 15942.82,
+        "avg_income": 80671.62
+      },
+      {
+        "category": "Charged Off",
+        "loans": 268559,
+        "default_rate": 100.0,
+        "avg_loan_amount": 15565.06,
+        "avg_income": 70400.74
+      },
+      {
+        "category": "Late (31-120 days)",
+        "loans": 21467,
+        "default_rate": 0.0,
+        "avg_loan_amount": 16946.61,
+        "avg_income": 77025.61
+      },
+      {
+        "category": "In Grace Period",
+        "loans": 8436,
+        "default_rate": 0.0,
+        "avg_loan_amount": 17672.56,
+        "avg_income": 81254.21
+      },
+      {
+        "category": "Late (16-30 days)",
+        "loans": 4349,
+        "default_rate": 0.0,
+        "avg_loan_amount": 17391.12,
+        "avg_income": 79266.31
+      },
+      {
+        "category": "Does not meet the credit policy. Status:Fully Paid",
+        "loans": 1988,
+        "default_rate": 0.0,
+        "avg_loan_amount": 8853.23,
+        "avg_income": 72000.26
+      },
+      {
+        "category": "Does not meet the credit policy. Status:Charged Off",
+        "loans": 761,
+        "default_rate": 0.0,
+        "avg_loan_amount": 9527.23,
+        "avg_income": 69525.92
+      },
+      {
+        "category": "Default",
+        "loans": 40,
+        "default_rate": 100.0,
+        "avg_loan_amount": 14350.62,
+        "avg_income": 74176.8
+      },
+      {
+        "category": "Missing",
+        "loans": 33,
+        "default_rate": 0.0,
+        "avg_loan_amount": 0.0,
+        "avg_income": 0.0
+      }
+    ],
+    "grade": [
+      {
+        "category": "B",
+        "loans": 663557,
+        "default_rate": 7.923,
+        "avg_loan_amount": 14173.34,
+        "avg_income": 78813.57
+      },
+      {
+        "category": "C",
+        "loans": 650053,
+        "default_rate": 13.177,
+        "avg_loan_amount": 15038.08,
+        "avg_income": 74370.29
+      },
+      {
+        "category": "A",
+        "loans": 433027,
+        "default_rate": 3.281,
+        "avg_loan_amount": 14603.34,
+        "avg_income": 89901.57
+      },
+      {
+        "category": "D",
+        "loans": 324424,
+        "default_rate": 18.823,
+        "avg_loan_amount": 15711.98,
+        "avg_income": 71030.18
+      },
+      {
+        "category": "E",
+        "loans": 135639,
+        "default_rate": 26.571,
+        "avg_loan_amount": 17453.08,
+        "avg_income": 71855.51
+      },
+      {
+        "category": "F",
+        "loans": 41800,
+        "default_rate": 34.67,
+        "avg_loan_amount": 19124.65,
+        "avg_income": 72657.78
+      },
+      {
+        "category": "G",
+        "loans": 12168,
+        "default_rate": 37.475,
+        "avg_loan_amount": 20383.99,
+        "avg_income": 75241.69
+      },
+      {
+        "category": "Missing",
+        "loans": 33,
+        "default_rate": 0.0,
+        "avg_loan_amount": 0.0,
+        "avg_income": 0.0
+      }
+    ],
+    "sub_grade": [
+      {
+        "category": "C1",
+        "loans": 145903,
+        "default_rate": 11.125,
+        "avg_loan_amount": 14471.29,
+        "avg_income": 75619.55
+      },
+      {
+        "category": "B5",
+        "loans": 140288,
+        "default_rate": 9.828,
+        "avg_loan_amount": 13901.49,
+        "avg_income": 75032.81
+      },
+      {
+        "category": "B4",
+        "loans": 139793,
+        "default_rate": 8.825,
+        "avg_loan_amount": 14196.27,
+        "avg_income": 77017.32
+      },
+      {
+        "category": "B3",
+        "loans": 131514,
+        "default_rate": 8.079,
+        "avg_loan_amount": 14140.12,
+        "avg_income": 78221.17
+      },
+      {
+        "category": "C2",
+        "loans": 131116,
+        "default_rate": 12.519,
+        "avg_loan_amount": 14568.59,
+        "avg_income": 74249.5
+      },
+      {
+        "category": "C3",
+        "loans": 129193,
+        "default_rate": 13.077,
+        "avg_loan_amount": 15196.07,
+        "avg_income": 74747.11
+      },
+      {
+        "category": "C4",
+        "loans": 127115,
+        "default_rate": 14.591,
+        "avg_loan_amount": 15544.03,
+        "avg_income": 73779.52
+      },
+      {
+        "category": "B2",
+        "loans": 126621,
+        "default_rate": 6.642,
+        "avg_loan_amount": 14441.46,
+        "avg_income": 81601.4
+      },
+      {
+        "category": "B1",
+        "loans": 125341,
+        "default_rate": 5.917,
+        "avg_loan_amount": 14216.03,
+        "avg_income": 82853.81
+      },
+      {
+        "category": "C5",
+        "loans": 116726,
+        "default_rate": 15.052,
+        "avg_loan_amount": 15548.08,
+        "avg_income": 73170.73
+      },
+      {
+        "category": "A5",
+        "loans": 107617,
+        "default_rate": 5.0,
+        "avg_loan_amount": 14390.69,
+        "avg_income": 84472.19
+      },
+      {
+        "category": "A4",
+        "loans": 95874,
+        "default_rate": 3.742,
+        "avg_loan_amount": 14881.9,
+        "avg_income": 86718.04
+      },
+      {
+        "category": "A1",
+        "loans": 86790,
+        "default_rate": 1.623,
+        "avg_loan_amount": 15289.02,
+        "avg_income": 101523.53
+      },
+      {
+        "category": "D1",
+        "loans": 81787,
+        "default_rate": 17.45,
+        "avg_loan_amount": 15301.37,
+        "avg_income": 70870.79
+      },
+      {
+        "category": "A3",
+        "loans": 73184,
+        "default_rate": 2.861,
+        "avg_loan_amount": 14114.05,
+        "avg_income": 87820.78
+      },
+      {
+        "category": "D2",
+        "loans": 72899,
+        "default_rate": 18.206,
+        "avg_loan_amount": 15328.6,
+        "avg_income": 71004.99
+      },
+      {
+        "category": "A2",
+        "loans": 69562,
+        "default_rate": 2.493,
+        "avg_loan_amount": 14207.68,
+        "avg_income": 90377.74
+      },
+      {
+        "category": "D3",
+        "loans": 64819,
+        "default_rate": 18.533,
+        "avg_loan_amount": 15673.84,
+        "avg_income": 70728.86
+      },
+      {
+        "category": "D4",
+        "loans": 56896,
+        "default_rate": 20.237,
+        "avg_loan_amount": 16056.14,
+        "avg_income": 71622.94
+      },
+      {
+        "category": "D5",
+        "loans": 48023,
+        "default_rate": 20.815,
+        "avg_loan_amount": 16637.0,
+        "avg_income": 71044.32
+      },
+      {
+        "category": "E1",
+        "loans": 33573,
+        "default_rate": 25.512,
+        "avg_loan_amount": 16639.99,
+        "avg_income": 71429.54
+      },
+      {
+        "category": "E2",
+        "loans": 29924,
+        "default_rate": 26.825,
+        "avg_loan_amount": 17033.22,
+        "avg_income": 71536.94
+      },
+      {
+        "category": "E3",
+        "loans": 26708,
+        "default_rate": 26.651,
+        "avg_loan_amount": 17574.9,
+        "avg_income": 71164.52
+      },
+      {
+        "category": "E4",
+        "loans": 22763,
+        "default_rate": 27.707,
+        "avg_loan_amount": 18165.08,
+        "avg_income": 72670.13
+      },
+      {
+        "category": "E5",
+        "loans": 22671,
+        "default_rate": 26.571,
+        "avg_loan_amount": 18352.94,
+        "avg_income": 72902.94
+      },
+      {
+        "category": "F1",
+        "loans": 13413,
+        "default_rate": 31.44,
+        "avg_loan_amount": 18819.11,
+        "avg_income": 72224.66
+      },
+      {
+        "category": "F2",
+        "loans": 9305,
+        "default_rate": 35.078,
+        "avg_loan_amount": 19100.69,
+        "avg_income": 73190.85
+      },
+      {
+        "category": "F3",
+        "loans": 7791,
+        "default_rate": 35.22,
+        "avg_loan_amount": 18894.18,
+        "avg_income": 72349.15
+      },
+      {
+        "category": "F4",
+        "loans": 6124,
+        "default_rate": 37.998,
+        "avg_loan_amount": 19266.25,
+        "avg_income": 72072.05
+      },
+      {
+        "category": "F5",
+        "loans": 5167,
+        "default_rate": 37.546,
+        "avg_loan_amount": 20140.62,
+        "avg_income": 73981.75
+      }
+    ],
+    "purpose": [
+      {
+        "category": "debt_consolidation",
+        "loans": 1277877,
+        "default_rate": 12.915,
+        "avg_loan_amount": 15966.7,
+        "avg_income": 76880.85
+      },
+      {
+        "category": "credit_card",
+        "loans": 516971,
+        "default_rate": 9.669,
+        "avg_loan_amount": 15319.73,
+        "avg_income": 77942.81
+      },
+      {
+        "category": "home_improvement",
+        "loans": 150457,
+        "default_rate": 10.305,
+        "avg_loan_amount": 14666.15,
+        "avg_income": 92490.41
+      },
+      {
+        "category": "other",
+        "loans": 139440,
+        "default_rate": 11.752,
+        "avg_loan_amount": 10481.09,
+        "avg_income": 72878.83
+      },
+      {
+        "category": "major_purchase",
+        "loans": 50445,
+        "default_rate": 10.853,
+        "avg_loan_amount": 12682.43,
+        "avg_income": 79555.7
+      },
+      {
+        "category": "medical",
+        "loans": 27488,
+        "default_rate": 12.329,
+        "avg_loan_amount": 9474.19,
+        "avg_income": 73633.45
+      },
+      {
+        "category": "small_business",
+        "loans": 24689,
+        "default_rate": 18.551,
+        "avg_loan_amount": 16442.69,
+        "avg_income": 93972.67
+      },
+      {
+        "category": "car",
+        "loans": 24013,
+        "default_rate": 8.928,
+        "avg_loan_amount": 9393.72,
+        "avg_income": 70224.04
+      },
+      {
+        "category": "vacation",
+        "loans": 15525,
+        "default_rate": 11.195,
+        "avg_loan_amount": 6358.0,
+        "avg_income": 69815.78
+      },
+      {
+        "category": "moving",
+        "loans": 15403,
+        "default_rate": 14.374,
+        "avg_loan_amount": 8390.81,
+        "avg_income": 70349.7
+      },
+      {
+        "category": "house",
+        "loans": 14136,
+        "default_rate": 11.234,
+        "avg_loan_amount": 15703.92,
+        "avg_income": 84530.38
+      },
+      {
+        "category": "wedding",
+        "loans": 2355,
+        "default_rate": 11.847,
+        "avg_loan_amount": 10475.86,
+        "avg_income": 69553.1
+      },
+      {
+        "category": "renewable_energy",
+        "loans": 1445,
+        "default_rate": 15.294,
+        "avg_loan_amount": 10757.02,
+        "avg_income": 73788.82
+      },
+      {
+        "category": "educational",
+        "loans": 424,
+        "default_rate": 13.208,
+        "avg_loan_amount": 6614.62,
+        "avg_income": 51280.18
+      },
+      {
+        "category": "Missing",
+        "loans": 33,
+        "default_rate": 0.0,
+        "avg_loan_amount": 0.0,
+        "avg_income": 0.0
+      }
+    ],
+    "emp_length": [
+      {
+        "category": "10+ years",
+        "loans": 748005,
+        "default_rate": 11.105,
+        "avg_loan_amount": 16242.19,
+        "avg_income": 86566.15
+      },
+      {
+        "category": "2 years",
+        "loans": 203677,
+        "default_rate": 11.843,
+        "avg_loan_amount": 14366.74,
+        "avg_income": 75336.04
+      },
+      {
+        "category": "< 1 year",
+        "loans": 189988,
+        "default_rate": 11.678,
+        "avg_loan_amount": 14820.01,
+        "avg_income": 73097.98
+      },
+      {
+        "category": "3 years",
+        "loans": 180753,
+        "default_rate": 11.89,
+        "avg_loan_amount": 14497.43,
+        "avg_income": 76057.21
+      },
+      {
+        "category": "1 year",
+        "loans": 148403,
+        "default_rate": 12.263,
+        "avg_loan_amount": 14073.68,
+        "avg_income": 72876.35
+      },
+      {
+        "category": "Missing",
+        "loans": 146940,
+        "default_rate": 14.383,
+        "avg_loan_amount": 12115.46,
+        "avg_income": 49633.17
+      },
+      {
+        "category": "5 years",
+        "loans": 139698,
+        "default_rate": 11.808,
+        "avg_loan_amount": 14803.51,
+        "avg_income": 77604.54
+      },
+      {
+        "category": "4 years",
+        "loans": 136605,
+        "default_rate": 11.641,
+        "avg_loan_amount": 14599.49,
+        "avg_income": 76783.58
+      },
+      {
+        "category": "6 years",
+        "loans": 102628,
+        "default_rate": 11.831,
+        "avg_loan_amount": 14971.11,
+        "avg_income": 78921.97
+      },
+      {
+        "category": "7 years",
+        "loans": 92695,
+        "default_rate": 12.536,
+        "avg_loan_amount": 15146.76,
+        "avg_income": 79173.46
+      },
+      {
+        "category": "8 years",
+        "loans": 91914,
+        "default_rate": 13.168,
+        "avg_loan_amount": 15331.95,
+        "avg_income": 79771.98
+      },
+      {
+        "category": "9 years",
+        "loans": 79395,
+        "default_rate": 12.768,
+        "avg_loan_amount": 15412.95,
+        "avg_income": 80283.4
+      }
+    ],
+    "home_ownership": [
+      {
+        "category": "MORTGAGE",
+        "loans": 1111450,
+        "default_rate": 10.306,
+        "avg_loan_amount": 16693.07,
+        "avg_income": 88350.68
+      },
+      {
+        "category": "RENT",
+        "loans": 894929,
+        "default_rate": 13.866,
+        "avg_loan_amount": 13196.43,
+        "avg_income": 66631.06
+      },
+      {
+        "category": "OWN",
+        "loans": 253057,
+        "default_rate": 11.804,
+        "avg_loan_amount": 14371.2,
+        "avg_income": 72717.43
+      },
+      {
+        "category": "ANY",
+        "loans": 996,
+        "default_rate": 5.622,
+        "avg_loan_amount": 13347.74,
+        "avg_income": 70633.98
+      },
+      {
+        "category": "OTHER",
+        "loans": 182,
+        "default_rate": 14.835,
+        "avg_loan_amount": 10810.16,
+        "avg_income": 66667.02
+      },
+      {
+        "category": "NONE",
+        "loans": 54,
+        "default_rate": 12.963,
+        "avg_loan_amount": 13643.98,
+        "avg_income": 57443.54
+      },
+      {
+        "category": "Missing",
+        "loans": 33,
+        "default_rate": 0.0,
+        "avg_loan_amount": 0.0,
+        "avg_income": 0.0
+      }
+    ],
+    "verification_status": [
+      {
+        "category": "Source Verified",
+        "loans": 886231,
+        "default_rate": 12.327,
+        "avg_loan_amount": 15398.73,
+        "avg_income": 82499.18
+      },
+      {
+        "category": "Not Verified",
+        "loans": 744806,
+        "default_rate": 7.994,
+        "avg_loan_amount": 12681.2,
+        "avg_income": 72631.73
+      },
+      {
+        "category": "Verified",
+        "loans": 629631,
+        "default_rate": 15.852,
+        "avg_loan_amount": 17350.23,
+        "avg_income": 77989.81
+      },
+      {
+        "category": "Missing",
+        "loans": 33,
+        "default_rate": 0.0,
+        "avg_loan_amount": 0.0,
+        "avg_income": 0.0
+      }
+    ],
+    "addr_state": [
+      {
+        "category": "CA",
+        "loans": 314533,
+        "default_rate": 12.253,
+        "avg_loan_amount": 15287.68,
+        "avg_income": 83847.98
+      },
+      {
+        "category": "NY",
+        "loans": 186389,
+        "default_rate": 12.994,
+        "avg_loan_amount": 14846.16,
+        "avg_income": 81055.31
+      },
+      {
+        "category": "TX",
+        "loans": 186335,
+        "default_rate": 11.722,
+        "avg_loan_amount": 15730.45,
+        "avg_income": 82728.81
+      },
+      {
+        "category": "FL",
+        "loans": 161991,
+        "default_rate": 12.677,
+        "avg_loan_amount": 14402.25,
+        "avg_income": 73171.61
+      },
+      {
+        "category": "IL",
+        "loans": 91173,
+        "default_rate": 10.269,
+        "avg_loan_amount": 15470.06,
+        "avg_income": 79884.92
+      },
+      {
+        "category": "NJ",
+        "loans": 83132,
+        "default_rate": 12.311,
+        "avg_loan_amount": 15832.75,
+        "avg_income": 89920.51
+      },
+      {
+        "category": "PA",
+        "loans": 76939,
+        "default_rate": 12.305,
+        "avg_loan_amount": 14712.8,
+        "avg_income": 73940.35
+      },
+      {
+        "category": "OH",
+        "loans": 75132,
+        "default_rate": 11.982,
+        "avg_loan_amount": 14336.67,
+        "avg_income": 69322.61
+      },
+      {
+        "category": "GA",
+        "loans": 74196,
+        "default_rate": 10.753,
+        "avg_loan_amount": 15321.46,
+        "avg_income": 77857.57
+      },
+      {
+        "category": "VA",
+        "loans": 62954,
+        "default_rate": 12.05,
+        "avg_loan_amount": 16091.37,
+        "avg_income": 86071.97
+      },
+      {
+        "category": "NC",
+        "loans": 62730,
+        "default_rate": 12.52,
+        "avg_loan_amount": 14832.39,
+        "avg_income": 73853.2
+      },
+      {
+        "category": "MI",
+        "loans": 58770,
+        "default_rate": 12.168,
+        "avg_loan_amount": 14321.02,
+        "avg_income": 71660.97
+      },
+      {
+        "category": "MD",
+        "loans": 54008,
+        "default_rate": 12.322,
+        "avg_loan_amount": 15865.86,
+        "avg_income": 86919.01
+      },
+      {
+        "category": "AZ",
+        "loans": 53777,
+        "default_rate": 11.938,
+        "avg_loan_amount": 14522.31,
+        "avg_income": 74186.97
+      },
+      {
+        "category": "MA",
+        "loans": 51784,
+        "default_rate": 11.397,
+        "avg_loan_amount": 15675.63,
+        "avg_income": 82788.66
+      },
+      {
+        "category": "CO",
+        "loans": 48183,
+        "default_rate": 9.561,
+        "avg_loan_amount": 15103.34,
+        "avg_income": 76948.31
+      },
+      {
+        "category": "WA",
+        "loans": 47060,
+        "default_rate": 9.775,
+        "avg_loan_amount": 15333.79,
+        "avg_income": 77462.93
+      },
+      {
+        "category": "MN",
+        "loans": 39517,
+        "default_rate": 11.975,
+        "avg_loan_amount": 14612.64,
+        "avg_income": 73239.38
+      },
+      {
+        "category": "IN",
+        "loans": 37515,
+        "default_rate": 12.392,
+        "avg_loan_amount": 14681.51,
+        "avg_income": 70365.19
+      },
+      {
+        "category": "MO",
+        "loans": 36084,
+        "default_rate": 12.548,
+        "avg_loan_amount": 14524.41,
+        "avg_income": 70177.88
+      },
+      {
+        "category": "CT",
+        "loans": 35785,
+        "default_rate": 9.582,
+        "avg_loan_amount": 15301.3,
+        "avg_income": 86531.03
+      },
+      {
+        "category": "TN",
+        "loans": 35483,
+        "default_rate": 12.299,
+        "avg_loan_amount": 14720.91,
+        "avg_income": 70665.98
+      },
+      {
+        "category": "NV",
+        "loans": 32657,
+        "default_rate": 13.605,
+        "avg_loan_amount": 14397.08,
+        "avg_income": 73480.53
+      },
+      {
+        "category": "WI",
+        "loans": 29877,
+        "default_rate": 10.891,
+        "avg_loan_amount": 14451.45,
+        "avg_income": 69053.08
+      },
+      {
+        "category": "SC",
+        "loans": 28003,
+        "default_rate": 9.299,
+        "avg_loan_amount": 14944.18,
+        "avg_income": 73137.99
+      },
+      {
+        "category": "AL",
+        "loans": 27284,
+        "default_rate": 14.389,
+        "avg_loan_amount": 14686.24,
+        "avg_income": 70854.75
+      },
+      {
+        "category": "OR",
+        "loans": 26789,
+        "default_rate": 8.825,
+        "avg_loan_amount": 14165.03,
+        "avg_income": 68737.99
+      },
+      {
+        "category": "LA",
+        "loans": 25759,
+        "default_rate": 13.949,
+        "avg_loan_amount": 14831.56,
+        "avg_income": 75669.09
+      },
+      {
+        "category": "KY",
+        "loans": 21887,
+        "default_rate": 12.309,
+        "avg_loan_amount": 14326.2,
+        "avg_income": 69534.68
+      },
+      {
+        "category": "OK",
+        "loans": 20691,
+        "default_rate": 13.934,
+        "avg_loan_amount": 15014.52,
+        "avg_income": 72413.97
+      }
+    ]
+  },
+  "risk_bands": {
+    "int_rate": [
+      {
+        "band": "12\u201316%",
+        "loans": 661910,
+        "default_rate": 13.678
+      },
+      {
+        "band": "8\u201312%",
+        "loans": 664704,
+        "default_rate": 7.673
+      },
+      {
+        "band": "20%+",
+        "loans": 177809,
+        "default_rate": 24.58
+      },
+      {
+        "band": "<8%",
+        "loans": 382213,
+        "default_rate": 3.177
+      },
+      {
+        "band": "16\u201320%",
+        "loans": 374032,
+        "default_rate": 19.039
+      },
+      {
+        "band": "Missing",
+        "loans": 33,
+        "default_rate": 0.0
+      }
+    ],
+    "annual_inc": [
+      {
+        "band": "40\u201360k",
+        "loans": 606346,
+        "default_rate": 13.239
+      },
+      {
+        "band": "60\u201380k",
+        "loans": 482901,
+        "default_rate": 11.884
+      },
+      {
+        "band": "80\u2013120k",
+        "loans": 486987,
+        "default_rate": 10.292
+      },
+      {
+        "band": "<40k",
+        "loans": 411144,
+        "default_rate": 14.129
+      },
+      {
+        "band": "120k+",
+        "loans": 273286,
+        "default_rate": 8.316
+      },
+      {
+        "band": "Missing",
+        "loans": 37,
+        "default_rate": 0.0
+      }
+    ],
+    "dti": [
+      {
+        "band": "<10",
+        "loans": 408634,
+        "default_rate": 8.968
+      },
+      {
+        "band": "10\u201320",
+        "loans": 922666,
+        "default_rate": 10.873
+      },
+      {
+        "band": "20\u201330",
+        "loans": 682257,
+        "default_rate": 13.796
+      },
+      {
+        "band": "30\u201340",
+        "loans": 218220,
+        "default_rate": 16.209
+      },
+      {
+        "band": "40+",
+        "loans": 27178,
+        "default_rate": 7.605
+      },
+      {
+        "band": "Missing",
+        "loans": 1746,
+        "default_rate": 4.066
+      }
+    ],
+    "revol_util": [
+      {
+        "band": "25\u201350%",
+        "loans": 723240,
+        "default_rate": 11.037
+      },
+      {
+        "band": "<25%",
+        "loans": 399642,
+        "default_rate": 8.242
+      },
+      {
+        "band": "50\u201375%",
+        "loans": 715563,
+        "default_rate": 13.298
+      },
+      {
+        "band": "75\u2013100%",
+        "loans": 413078,
+        "default_rate": 14.343
+      },
+      {
+        "band": "100%+",
+        "loans": 7343,
+        "default_rate": 16.982
+      },
+      {
+        "band": "Missing",
+        "loans": 1835,
+        "default_rate": 9.809
+      }
+    ],
+    "fico_mid": [
+      {
+        "band": "660\u2013699",
+        "loans": 1304313,
+        "default_rate": 14.847
+      },
+      {
+        "band": "700\u2013739",
+        "loans": 673794,
+        "default_rate": 9.04
+      },
+      {
+        "band": "780+",
+        "loans": 74844,
+        "default_rate": 3.638
+      },
+      {
+        "band": "740\u2013779",
+        "loans": 207228,
+        "default_rate": 5.457
+      },
+      {
+        "band": "Missing",
+        "loans": 33,
+        "default_rate": 0.0
+      },
+      {
+        "band": "<660",
+        "loans": 489,
+        "default_rate": 0.0
+      }
+    ]
+  },
+  "data_quality": {
+    "id": {
+      "missing_count": 0,
+      "missing_pct": 0.0,
+      "dtype": "str"
+    },
+    "loan_amnt": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "funded_amnt": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "int_rate": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "grade": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "sub_grade": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "emp_length": {
+      "missing_count": 146940,
+      "missing_pct": 6.5,
+      "dtype": "str"
+    },
+    "home_ownership": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "annual_inc": {
+      "missing_count": 37,
+      "missing_pct": 0.002,
+      "dtype": "float64"
+    },
+    "verification_status": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "issue_d": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "loan_status": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "purpose": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "addr_state": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    },
+    "dti": {
+      "missing_count": 1744,
+      "missing_pct": 0.077,
+      "dtype": "float64"
+    },
+    "fico_range_low": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "fico_range_high": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "revol_util": {
+      "missing_count": 1835,
+      "missing_pct": 0.081,
+      "dtype": "float64"
+    },
+    "revol_bal": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "float64"
+    },
+    "term": {
+      "missing_count": 33,
+      "missing_pct": 0.001,
+      "dtype": "str"
+    }
+  },
+  "correlations": {
+    "pearson": {
+      "loan_amnt": {
+        "loan_amnt": 1.0,
+        "int_rate": 0.101,
+        "annual_inc": 0.4053,
+        "dti": 0.0598,
+        "fico_mid": 0.096,
+        "revol_util": 0.1109,
+        "default": 0.0212
+      },
+      "int_rate": {
+        "loan_amnt": 0.101,
+        "int_rate": 1.0,
+        "annual_inc": -0.1095,
+        "dti": 0.153,
+        "fico_mid": -0.4224,
+        "revol_util": 0.2754,
+        "default": 0.1982
+      },
+      "annual_inc": {
+        "loan_amnt": 0.4053,
+        "int_rate": -0.1095,
+        "annual_inc": 1.0,
+        "dti": -0.1838,
+        "fico_mid": 0.0747,
+        "revol_util": 0.0613,
+        "default": -0.0518
+      },
+      "dti": {
+        "loan_amnt": 0.0598,
+        "int_rate": 0.153,
+        "annual_inc": -0.1838,
+        "dti": 1.0,
+        "fico_mid": -0.0394,
+        "revol_util": 0.1465,
+        "default": 0.0411
+      },
+      "fico_mid": {
+        "loan_amnt": 0.096,
+        "int_rate": -0.4224,
+        "annual_inc": 0.0747,
+        "dti": -0.0394,
+        "fico_mid": 1.0,
+        "revol_util": -0.4796,
+        "default": -0.1262
+      },
+      "revol_util": {
+        "loan_amnt": 0.1109,
+        "int_rate": 0.2754,
+        "annual_inc": 0.0613,
+        "dti": 0.1465,
+        "fico_mid": -0.4796,
+        "revol_util": 1.0,
+        "default": 0.0771
+      },
+      "default": {
+        "loan_amnt": 0.0212,
+        "int_rate": 0.1982,
+        "annual_inc": -0.0518,
+        "dti": 0.0411,
+        "fico_mid": -0.1262,
+        "revol_util": 0.0771,
+        "default": 1.0
+      }
+    },
+    "spearman": {
+      "loan_amnt": {
+        "loan_amnt": 1.0,
+        "int_rate": 0.1009,
+        "annual_inc": 0.4626,
+        "dti": 0.0642,
+        "fico_mid": 0.1083,
+        "revol_util": 0.1242,
+        "default": 0.0325
+      },
+      "int_rate": {
+        "loan_amnt": 0.1009,
+        "int_rate": 1.0,
+        "annual_inc": -0.1393,
+        "dti": 0.1944,
+        "fico_mid": -0.4399,
+        "revol_util": 0.2988,
+        "default": 0.2002
+      },
+      "annual_inc": {
+        "loan_amnt": 0.4626,
+        "int_rate": -0.1393,
+        "annual_inc": 1.0,
+        "dti": -0.1971,
+        "fico_mid": 0.0803,
+        "revol_util": 0.0802,
+        "default": -0.0528
+      },
+      "dti": {
+        "loan_amnt": 0.0642,
+        "int_rate": 0.1944,
+        "annual_inc": -0.1971,
+        "dti": 1.0,
+        "fico_mid": -0.0221,
+        "revol_util": 0.1831,
+        "default": 0.0651
+      },
+      "fico_mid": {
+        "loan_amnt": 0.1083,
+        "int_rate": -0.4399,
+        "annual_inc": 0.0803,
+        "dti": -0.0221,
+        "fico_mid": 1.0,
+        "revol_util": -0.4223,
+        "default": -0.1264
+      },
+      "revol_util": {
+        "loan_amnt": 0.1242,
+        "int_rate": 0.2988,
+        "annual_inc": 0.0802,
+        "dti": 0.1831,
+        "fico_mid": -0.4223,
+        "revol_util": 1.0,
+        "default": 0.0767
+      },
+      "default": {
+        "loan_amnt": 0.0325,
+        "int_rate": 0.2002,
+        "annual_inc": -0.0528,
+        "dti": 0.0651,
+        "fico_mid": -0.1264,
+        "revol_util": 0.0767,
+        "default": 1.0
+      }
+    },
+    "kendall": {
+      "loan_amnt": {
+        "loan_amnt": 1.0,
+        "int_rate": 0.0993,
+        "annual_inc": 0.3508,
+        "dti": 0.0839,
+        "fico_mid": 0.1216,
+        "revol_util": 0.0982,
+        "default": 0.1028
+      },
+      "int_rate": {
+        "loan_amnt": 0.0993,
+        "int_rate": 1.0,
+        "annual_inc": -0.1252,
+        "dti": 0.1542,
+        "fico_mid": -0.3114,
+        "revol_util": 0.1761,
+        "default": 0.4044
+      },
+      "annual_inc": {
+        "loan_amnt": 0.3508,
+        "int_rate": -0.1252,
+        "annual_inc": 1.0,
+        "dti": -0.1121,
+        "fico_mid": 0.131,
+        "revol_util": 0.0606,
+        "default": -0.095
+      },
+      "dti": {
+        "loan_amnt": 0.0839,
+        "int_rate": 0.1542,
+        "annual_inc": -0.1121,
+        "dti": 1.0,
+        "fico_mid": -0.0257,
+        "revol_util": 0.134,
+        "default": 0.0944
+      },
+      "fico_mid": {
+        "loan_amnt": 0.1216,
+        "int_rate": -0.3114,
+        "annual_inc": 0.131,
+        "dti": -0.0257,
+        "fico_mid": 1.0,
+        "revol_util": -0.2166,
+        "default": -0.2164
+      },
+      "revol_util": {
+        "loan_amnt": 0.0982,
+        "int_rate": 0.1761,
+        "annual_inc": 0.0606,
+        "dti": 0.134,
+        "fico_mid": -0.2166,
+        "revol_util": 1.0,
+        "default": -0.0094
+      },
+      "default": {
+        "loan_amnt": 0.1028,
+        "int_rate": 0.4044,
+        "annual_inc": -0.095,
+        "dti": 0.0944,
+        "fico_mid": -0.2164,
+        "revol_util": -0.0094,
+        "default": 1.0
+      }
+    }
+  },
+  "time_series": [
+    {
+      "period": "2007Q2",
+      "loans": 24,
+      "default_rate": 0.0,
+      "avg_interest_rate": 9.815
+    },
+    {
+      "period": "2007Q3",
+      "loans": 190,
+      "default_rate": 5.263,
+      "avg_interest_rate": 11.672
+    },
+    {
+      "period": "2007Q4",
+      "loans": 389,
+      "default_rate": 8.997,
+      "avg_interest_rate": 12.024
+    },
+    {
+      "period": "2008Q1",
+      "loans": 1013,
+      "default_rate": 9.477,
+      "avg_interest_rate": 12.096
+    },
+    {
+      "period": "2008Q2",
+      "loans": 498,
+      "default_rate": 8.835,
+      "avg_interest_rate": 11.926
+    },
+    {
+      "period": "2008Q3",
+      "loans": 298,
+      "default_rate": 9.396,
+      "avg_interest_rate": 12.237
+    },
+    {
+      "period": "2008Q4",
+      "loans": 584,
+      "default_rate": 13.527,
+      "avg_interest_rate": 12.029
+    },
+    {
+      "period": "2009Q1",
+      "loans": 895,
+      "default_rate": 10.391,
+      "avg_interest_rate": 12.785
+    },
+    {
+      "period": "2009Q2",
+      "loans": 1098,
+      "default_rate": 11.384,
+      "avg_interest_rate": 12.236
+    },
+    {
+      "period": "2009Q3",
+      "loans": 1364,
+      "default_rate": 10.557,
+      "avg_interest_rate": 12.273
+    },
+    {
+      "period": "2009Q4",
+      "loans": 1924,
+      "default_rate": 12.058,
+      "avg_interest_rate": 12.507
+    },
+    {
+      "period": "2010Q1",
+      "loans": 2172,
+      "default_rate": 9.576,
+      "avg_interest_rate": 12.021
+    },
+    {
+      "period": "2010Q2",
+      "loans": 3006,
+      "default_rate": 12.409,
+      "avg_interest_rate": 12.152
+    },
+    {
+      "period": "2010Q3",
+      "loans": 3568,
+      "default_rate": 12.892,
+      "avg_interest_rate": 12.637
+    },
+    {
+      "period": "2010Q4",
+      "loans": 3791,
+      "default_rate": 11.765,
+      "avg_interest_rate": 11.219
+    },
+    {
+      "period": "2011Q1",
+      "loans": 4126,
+      "default_rate": 13.694,
+      "avg_interest_rate": 11.592
+    },
+    {
+      "period": "2011Q2",
+      "loans": 5102,
+      "default_rate": 15.347,
+      "avg_interest_rate": 12.252
+    },
+    {
+      "period": "2011Q3",
+      "loans": 5876,
+      "default_rate": 14.653,
+      "avg_interest_rate": 12.097
+    },
+    {
+      "period": "2011Q4",
+      "loans": 6617,
+      "default_rate": 16.442,
+      "avg_interest_rate": 12.707
+    },
+    {
+      "period": "2012Q1",
+      "loans": 8076,
+      "default_rate": 16.147,
+      "avg_interest_rate": 12.498
+    },
+    {
+      "period": "2012Q2",
+      "loans": 10447,
+      "default_rate": 17.029,
+      "avg_interest_rate": 13.236
+    },
+    {
+      "period": "2012Q3",
+      "loans": 16133,
+      "default_rate": 16.451,
+      "avg_interest_rate": 13.833
+    },
+    {
+      "period": "2012Q4",
+      "loans": 18711,
+      "default_rate": 15.536,
+      "avg_interest_rate": 14.186
+    },
+    {
+      "period": "2013Q1",
+      "loans": 22706,
+      "default_rate": 15.018,
+      "avg_interest_rate": 14.137
+    },
+    {
+      "period": "2013Q2",
+      "loans": 30668,
+      "default_rate": 16.255,
+      "avg_interest_rate": 14.853
+    },
+    {
+      "period": "2013Q3",
+      "loans": 37571,
+      "default_rate": 15.563,
+      "avg_interest_rate": 14.634
+    },
+    {
+      "period": "2013Q4",
+      "loans": 43869,
+      "default_rate": 15.46,
+      "avg_interest_rate": 14.424
+    },
+    {
+      "period": "2014Q1",
+      "loans": 47410,
+      "default_rate": 16.349,
+      "avg_interest_rate": 14.328
+    },
+    {
+      "period": "2014Q2",
+      "loans": 55349,
+      "default_rate": 17.644,
+      "avg_interest_rate": 14.076
+    },
+    {
+      "period": "2014Q3",
+      "loans": 58726,
+      "default_rate": 17.692,
+      "avg_interest_rate": 13.816
+    },
+    {
+      "period": "2014Q4",
+      "loans": 74144,
+      "default_rate": 17.877,
+      "avg_interest_rate": 13.147
+    },
+    {
+      "period": "2015Q1",
+      "loans": 84277,
+      "default_rate": 18.315,
+      "avg_interest_rate": 12.876
+    },
+    {
+      "period": "2015Q2",
+      "loans": 95825,
+      "default_rate": 18.456,
+      "avg_interest_rate": 12.768
+    },
+    {
+      "period": "2015Q3",
+      "loans": 110489,
+      "default_rate": 17.938,
+      "avg_interest_rate": 12.656
+    },
+    {
+      "period": "2015Q4",
+      "loans": 130504,
+      "default_rate": 17.521,
+      "avg_interest_rate": 12.249
+    },
+    {
+      "period": "2016Q1",
+      "loans": 133887,
+      "default_rate": 17.023,
+      "avg_interest_rate": 12.476
+    },
+    {
+      "period": "2016Q2",
+      "loans": 97854,
+      "default_rate": 16.305,
+      "avg_interest_rate": 12.478
+    },
+    {
+      "period": "2016Q3",
+      "loans": 99120,
+      "default_rate": 15.946,
+      "avg_interest_rate": 13.723
+    },
+    {
+      "period": "2016Q4",
+      "loans": 103546,
+      "default_rate": 13.231,
+      "avg_interest_rate": 13.654
+    },
+    {
+      "period": "2017Q1",
+      "loans": 96779,
+      "default_rate": 11.109,
+      "avg_interest_rate": 13.368
+    },
+    {
+      "period": "2017Q2",
+      "loans": 105451,
+      "default_rate": 10.044,
+      "avg_interest_rate": 13.284
+    },
+    {
+      "period": "2017Q3",
+      "loans": 122701,
+      "default_rate": 8.556,
+      "avg_interest_rate": 13.468
+    },
+    {
+      "period": "2017Q4",
+      "loans": 118648,
+      "default_rate": 6.177,
+      "avg_interest_rate": 12.876
+    },
+    {
+      "period": "2018Q1",
+      "loans": 107864,
+      "default_rate": 4.067,
+      "avg_interest_rate": 12.424
+    },
+    {
+      "period": "2018Q2",
+      "loans": 130772,
+      "default_rate": 2.559,
+      "avg_interest_rate": 12.56
+    },
+    {
+      "period": "2018Q3",
+      "loans": 128194,
+      "default_rate": 0.794,
+      "avg_interest_rate": 12.956
+    },
+    {
+      "period": "2018Q4",
+      "loans": 128412,
+      "default_rate": 0.095,
+      "avg_interest_rate": 12.93
+    }
+  ]
+}

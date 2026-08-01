@@ -1,0 +1,2 @@
+durbin_watson_stat,durbin_watson_interpretation,breusch_godfrey_lm_stat,breusch_godfrey_pvalue,autocorrelation_present
+1.9549,No substantial first-order autocorrelation (DW ~ 2.0),13.3191,0.009817535390057775,Yes

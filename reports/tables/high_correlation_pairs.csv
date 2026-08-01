@@ -1,0 +1,7 @@
+feature_1,feature_2,correlation,abs_correlation
+dti,fe_debt_burden,1.0,1.0
+revol_util,fe_credit_utilization,1.0,1.0
+fe_loan_to_income_ratio,fe_monthly_installment_to_income_ratio,0.969,0.969
+revol_bal,fe_credit_exposure,0.9593,0.9593
+loan_amnt,installment,0.9556,0.9556
+open_acc,total_acc,0.7065,0.7065

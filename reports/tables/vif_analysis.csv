@@ -1,0 +1,13 @@
+feature,vif,tolerance,recommendation
+loan_amnt,12.3591,0.0809,High collinearity - Recommend removal or aggregation
+installment,11.8155,0.0846,High collinearity - Recommend removal or aggregation
+fico_range_low,1.6978,0.589,Low collinearity - Retain
+revol_util,1.5713,0.6364,Low collinearity - Retain
+int_rate,1.4209,0.7038,Low collinearity - Retain
+revol_bal,1.3536,0.7388,Low collinearity - Retain
+open_acc,1.3064,0.7654,Low collinearity - Retain
+dti,1.2137,0.8239,Low collinearity - Retain
+annual_inc,1.1832,0.8452,Low collinearity - Retain
+inq_last_6mths,1.1515,0.8685,Low collinearity - Retain
+pub_rec,1.0937,0.9143,Low collinearity - Retain
+delinq_2yrs,1.0501,0.9523,Low collinearity - Retain

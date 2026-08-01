@@ -1,0 +1,2 @@
+breusch_pagan_lm_stat,breusch_pagan_pvalue,white_lm_stat,white_pvalue,goldfeld_quandt_stat,goldfeld_quandt_pvalue,heteroskedasticity_present
+1681.5638,0.0,,,1.0604,0.005611630284036741,Yes

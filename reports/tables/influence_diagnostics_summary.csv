@@ -1,0 +1,2 @@
+sample_n,parameters_p,leverage_threshold_2p_n,high_leverage_observations,high_leverage_pct,cooks_distance_threshold_4_n,influential_cooks_observations,influential_cooks_pct,outlier_studentized_resids_abs3,outlier_studentized_pct,banking_recommendation
+5000,9,0.0036,304,6.08,0.0008,273,5.46,0,0.0,Do NOT remove observations blindly. Leverage capping (winsorization) or WoE fine-classing binning should be used in scorecard development to manage extreme values while preserving sample integrity.
