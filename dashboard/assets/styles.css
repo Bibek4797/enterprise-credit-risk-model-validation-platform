@@ -1,0 +1,85 @@
+/* Custom CSS Styling for Enterprise Credit Risk Dashboard */
+
+.stApp {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header Banner */
+.main-header {
+    background: linear-gradient(135deg, #0A2540 0%, #1A365D 100%);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    color: #FFFFFF;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.main-header h1 {
+    color: #FFFFFF;
+    font-weight: 700;
+    margin: 0;
+}
+
+.main-header p {
+    color: #E2E8F0;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.95rem;
+}
+
+/* KPI Cards */
+.kpi-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 1.2rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.kpi-title {
+    font-size: 0.85rem;
+    color: #718096;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1A202C;
+    margin: 0.4rem 0;
+}
+
+.kpi-subtext {
+    font-size: 0.8rem;
+    color: #4A5568;
+}
+
+/* Traffic Light Badges */
+.badge-green {
+    background-color: #DEF7EC;
+    color: #03543F;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-yellow {
+    background-color: #FEF08A;
+    color: #713F12;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-red {
+    background-color: #FDE8E8;
+    color: #9B1C1C;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
