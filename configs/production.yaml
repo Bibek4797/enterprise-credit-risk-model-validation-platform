@@ -1,0 +1,14 @@
+# Production Environment Configuration Overrides
+
+project:
+  environment: "production"
+
+data:
+  sample_rows: null # Use full dataset
+
+logging:
+  level: "INFO"
+
+security:
+  strict_pii_masking: true
+  enable_https_only: true

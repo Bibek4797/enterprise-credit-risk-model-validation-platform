@@ -1,0 +1,39 @@
+# Primary Application & Model Risk Governance Configuration
+
+project:
+  name: "Credit Risk Modelling & Independent Model Validation"
+  version: "1.0.0"
+  environment: "production"
+  author: "Quantitative Risk Analytics & Model Risk Governance Team"
+
+paths:
+  raw_data: "data/raw/accepted_2007_to_2018Q4.csv.gz"
+  processed_data: "data/processed/accepted_2007_to_2018Q4_feature_engineered.csv.gz"
+  model_dir: "models/"
+  reports_dir: "reports/"
+  logs_dir: "logs/"
+
+model:
+  champion_scorecard_id: "PD-SCORECARD-2026-V1"
+  champion_ml_id: "PD-LIGHTGBM-2026-CHALLENGER"
+  cutoff_threshold: 0.20
+  random_seed: 42
+  features:
+    - "int_rate"
+    - "annual_inc"
+    - "dti"
+    - "fico_range_low"
+    - "revol_util"
+    - "inq_last_6mths"
+
+monitoring:
+  psi_green_limit: 0.10
+  psi_yellow_limit: 0.25
+  min_auc_limit: 0.7200
+  min_ks_limit_pct: 34.0
+  check_frequency_days: 30
+
+logging:
+  level: "INFO"
+  max_bytes: 10485760 # 10 MB
+  backup_count: 5

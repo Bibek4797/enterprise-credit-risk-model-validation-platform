@@ -1,0 +1,33 @@
+name: Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest pytest-cov joblib statsmodels scikit-learn lightgbm catboost optuna shap torch streamlit plotly
+
+      - name: Lint with Ruff
+        run: |
+          ruff check src/ dashboard/
+
+      - name: Run Pytest Test Suite
+        run: |
+          pytest tests/ --cov=src --cov-report=term-missing

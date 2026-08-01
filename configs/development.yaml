@@ -1,0 +1,10 @@
+# Development Environment Configuration Overrides
+
+project:
+  environment: "development"
+
+data:
+  sample_rows: 50000
+
+logging:
+  level: "DEBUG"
