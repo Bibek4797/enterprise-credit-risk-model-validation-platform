@@ -21,7 +21,7 @@ Due to GitHub's file size limit ($100\text{ MB}$ per file), the raw compressed d
 2. Download `accepted_2007_to_2018Q4.csv.gz`.
 3. Place the file inside the `data/raw/` directory:
    ```
-   c:\Users\BIBEK\OneDrive\Desktop\Credit-Risk-Modelling\data\raw\accepted_2007_to_2018Q4.csv.gz
+   data/raw/accepted_2007_to_2018Q4.csv.gz
    ```
 
 ### Step 2: Automated Preprocessing & Synthetic Sample Generation

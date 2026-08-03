@@ -122,6 +122,7 @@ docker-compose up -d --build
 
 ## 📄 Formal Documentation & Governance Package (`docs/`)
 
+- [Master Final Release (v1.0.0) Report](docs/Final_Release_Report.md): Version 1.0.0 final release certification, dataset handling, and repository freeze manual.
 - [Infrastructure & Repository Audit Report](docs/Infrastructure_Audit_Report.md): Infrastructure justification, containerization audit, and repository optimization manual.
 - [Master Release Candidate (RC-1) Report](docs/Release_Candidate_Report.md): Final RC-1 verification, Streamlit standardization, and repository freeze report.
 - [Master Production Certification](docs/Enterprise_Certification.md): Official Tier-1 production deployment sign-off certificate.

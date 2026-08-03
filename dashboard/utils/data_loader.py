@@ -30,7 +30,8 @@ def load_credit_data(sample_size: int = 50000) -> pd.DataFrame:
         except Exception:
             df = pd.read_csv(data_path, nrows=sample_size, low_memory=False)
     else:
-        # Fallback synthetic dataset generator if data path is unavailable
+        # Inform user of missing raw dataset and provide Dataset Guide instructions
+        st.info("💡 **Demonstration Mode**: Full LendingClub dataset (`data/processed/...`) not found locally. Loading synthetic portfolio sample for dashboard interactivity. See [`data/README.md`](data/README.md) for full dataset download instructions.")
         np.random.seed(42)
         n = sample_size
         df = pd.DataFrame({
