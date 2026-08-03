@@ -4,13 +4,23 @@ import sys
 from pathlib import Path
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from utils.loaders import load_credit_data, load_trained_models
-from components.cards import render_kpi_card, render_traffic_light_header
-from components.charts import create_grade_distribution_chart
-from components.tables import render_styled_table
+try:
+    from utils.loaders import load_credit_data, load_trained_models
+    from components.cards import render_kpi_card, render_traffic_light_header
+    from components.charts import create_grade_distribution_chart
+    from components.tables import render_styled_table
+except ImportError:
+    from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.components.cards import render_kpi_card, render_traffic_light_header
+    from dashboard.components.charts import create_grade_distribution_chart
+    from dashboard.components.tables import render_styled_table
 
 st.set_page_config(page_title="Executive Dashboard", page_icon="📊", layout="wide")
 
@@ -22,7 +32,6 @@ render_traffic_light_header(status="GREEN", message="SR 11-7 Model Governance & 
 df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
 
-# Top KPI Metric Cards
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:

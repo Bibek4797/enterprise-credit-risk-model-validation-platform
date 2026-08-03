@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from config.theme import PRIMARY_BLUE, ACCENT_BLUE, SUCCESS_GREEN, DANGER_RED, WARNING_YELLOW, GRADE_COLORS, PLOTLY_THEME
+
+dash_dir = Path(__file__).resolve().parent.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
+
+try:
+    from config.theme import PRIMARY_BLUE, ACCENT_BLUE, SUCCESS_GREEN, DANGER_RED, WARNING_YELLOW, GRADE_COLORS, PLOTLY_THEME
+except ImportError:
+    from dashboard.config.theme import PRIMARY_BLUE, ACCENT_BLUE, SUCCESS_GREEN, DANGER_RED, WARNING_YELLOW, GRADE_COLORS, PLOTLY_THEME
 
 
 def create_grade_distribution_chart(df: pd.DataFrame) -> go.Figure:
@@ -70,7 +82,6 @@ def create_roc_curve_chart(
     return fig
 
 
-# Alias for create_roc_curve_chart
 create_roc_curves_chart = create_roc_curve_chart
 
 
@@ -92,7 +103,6 @@ def create_vintage_chart(vintage_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-# Alias for create_vintage_chart
 create_vintage_seasoning_chart = create_vintage_chart
 
 
@@ -104,7 +114,6 @@ def create_shap_summary_chart(
     if "mean_abs_shap" in df_or_ranking.columns:
         top_df = df_or_ranking.head(10).sort_values("mean_abs_shap", ascending=True)
     else:
-        # Generate proxy feature importance from numeric variance / correlation if raw df passed
         feat_list = features if features else [c for c in df_or_ranking.select_dtypes(include=[np.number]).columns if c != "target"][:10]
         importance_records = []
         for f in feat_list:
@@ -126,7 +135,6 @@ def create_shap_summary_chart(
     return fig
 
 
-# Alias for create_shap_summary_chart
 create_shap_summary_bar_chart = create_shap_summary_chart
 
 

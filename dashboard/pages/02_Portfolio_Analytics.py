@@ -4,13 +4,24 @@ import sys
 from pathlib import Path
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from utils.loaders import load_credit_data
-from components.filters import render_sidebar_filters
-from components.charts import create_vintage_chart
-from components.tables import render_styled_table
+try:
+    from utils.loaders import load_credit_data
+    from components.filters import render_sidebar_filters
+    from components.charts import create_vintage_chart
+    from components.tables import render_styled_table
+except ImportError:
+    from dashboard.utils.loaders import load_credit_data
+    from dashboard.components.filters import render_sidebar_filters
+    from dashboard.components.charts import create_vintage_chart
+    from dashboard.components.tables import render_styled_table
+
 from portfolio.segmentation import compute_geographic_concentration, analyze_recoveries
 from portfolio.vintage import generate_vintage_summary
 

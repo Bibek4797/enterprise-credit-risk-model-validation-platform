@@ -6,12 +6,22 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from utils.loaders import load_credit_data, load_trained_models
-from components.charts import create_stress_testing_chart
-from components.tables import render_styled_table
+try:
+    from utils.loaders import load_credit_data, load_trained_models
+    from components.charts import create_stress_testing_chart
+    from components.tables import render_styled_table
+except ImportError:
+    from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.components.charts import create_stress_testing_chart
+    from dashboard.components.tables import render_styled_table
+
 from stress_testing.stress_engine import run_portfolio_stress_test
 
 st.set_page_config(page_title="Stress Testing", page_icon="⚡", layout="wide")
@@ -22,7 +32,6 @@ df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
 feature_cols = models["features"]
 
-# Preset Stress Suite Execution
 st.markdown("### 📊 Macro & Borrower Stress Testing Response Suite")
 stress_summary = run_portfolio_stress_test(models["predict_scorecard"], df, feature_cols, lgd=0.95)
 
@@ -38,7 +47,6 @@ with table_col:
 
 st.markdown("---")
 
-# Interactive Custom Stress Simulator
 st.markdown("### 🎛️ Interactive Custom Macro Stress Simulator")
 
 col_s1, col_s2, col_s3, col_s4 = st.columns(4)
@@ -51,7 +59,6 @@ with col_s3:
 with col_s4:
     fico_shift = st.slider("FICO Shift (Points)", min_value=-100, max_value=50, value=-30, step=5)
 
-# Execute Custom Stress
 stressed_custom = df.copy()
 if "annual_inc" in stressed_custom.columns:
     stressed_custom["annual_inc"] = stressed_custom["annual_inc"] * (1.0 + inc_shift / 100.0)

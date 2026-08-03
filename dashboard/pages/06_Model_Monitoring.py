@@ -5,12 +5,22 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from utils.loaders import load_credit_data, load_trained_models
-from components.cards import render_traffic_light_header
-from components.tables import render_styled_table
+try:
+    from utils.loaders import load_credit_data, load_trained_models
+    from components.cards import render_traffic_light_header
+    from components.tables import render_styled_table
+except ImportError:
+    from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.components.cards import render_traffic_light_header
+    from dashboard.components.tables import render_styled_table
+
 from monitoring.psi import compute_segment_psi_table
 from monitoring.csi import build_portfolio_csi_report
 from monitoring.drift import ks_two_sample_drift_test
@@ -24,7 +34,6 @@ df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
 features = models["features"]
 
-# Split into Baseline (2015-2016) and Actual Monitoring (2017-2018)
 if "issue_d" in df.columns:
     df["year"] = pd.to_datetime(df["issue_d"], format="%b-%Y", errors="coerce").dt.year
     baseline_df = df[df["year"] <= 2016].copy()
@@ -36,11 +45,9 @@ else:
     baseline_df = df.iloc[:15000].copy()
     actual_df = df.iloc[15000:].copy()
 
-# PSI Audit
 psi_table = compute_segment_psi_table(baseline_df, actual_df, features)
 overall_psi = psi_table["psi_value"].mean() if not psi_table.empty else 0.0412
 
-# Retraining Decision
 retrain_res = evaluate_retraining_triggers(
     psi_value=overall_psi,
     current_auc=0.7245,

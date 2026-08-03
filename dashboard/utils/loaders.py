@@ -7,10 +7,19 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-sys.path.append(str(Path.cwd() / "dashboard"))
+# Ensure dashboard directory is on sys.path
+dash_dir = Path(__file__).resolve().parent.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from utils.data_loader import load_credit_data as _load_credit_data
-from utils.model_loader import load_trained_models as _load_trained_models
+try:
+    from utils.data_loader import load_credit_data as _load_credit_data
+    from utils.model_loader import load_trained_models as _load_trained_models
+except ImportError:
+    from dashboard.utils.data_loader import load_credit_data as _load_credit_data
+    from dashboard.utils.model_loader import load_trained_models as _load_trained_models
 
 
 @st.cache_data(ttl=3600)

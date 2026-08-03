@@ -4,8 +4,12 @@ import sys
 from pathlib import Path
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
 st.set_page_config(page_title="Governance Reports", page_icon="📄", layout="wide")
 
@@ -15,7 +19,7 @@ st.markdown("""
 Access, inspect, and download institutional model risk governance reports, validation audits, model cards, and executive briefs.
 """)
 
-reports_dir = Path.cwd() / "reports"
+reports_dir = root_dir / "reports"
 report_files = sorted(list(reports_dir.glob("*.md"))) if reports_dir.is_dir() else []
 
 if not report_files:

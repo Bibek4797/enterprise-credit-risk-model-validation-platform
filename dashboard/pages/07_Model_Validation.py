@@ -4,10 +4,18 @@ import sys
 from pathlib import Path
 import streamlit as st
 
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "dashboard"))
+file_path = Path(__file__).resolve()
+dash_dir = file_path.parent.parent if file_path.parent.name == "pages" else file_path.parent
+root_dir = dash_dir.parent
+for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from components.tables import render_styled_table
+try:
+    from components.tables import render_styled_table
+except ImportError:
+    from dashboard.components.tables import render_styled_table
+
 from deep_learning.evaluation import build_triangulation_benchmark_table
 
 st.set_page_config(page_title="Model Validation", page_icon="🤖", layout="wide")
@@ -20,14 +28,12 @@ st.markdown("""
 The objective of this phase is to evaluate whether PyTorch Neural Networks (MLP / TabNet) provide meaningful improvements over traditional Machine Learning models (LightGBM) and Baseline Statistical Models (Logistic Scorecard).
 """)
 
-# Metrics
 stat_m = {"roc_auc": 0.7245, "gini_index": 0.4490, "ks_statistic_pct": 34.82, "brier_score": 0.14120, "training_time": 1.2, "latency_ms": 0.5}
 ml_m = {"roc_auc": 0.7482, "gini_index": 0.4964, "ks_statistic_pct": 38.42, "brier_score": 0.13480, "training_time": 18.4, "latency_ms": 4.1}
 dl_m = {"roc_auc": 0.7312, "gini_index": 0.4624, "ks_statistic_pct": 35.80, "brier_score": 0.13950, "training_time": 45.2, "latency_ms": 12.8}
 
 bench_df = build_triangulation_benchmark_table(stat_m, ml_m, dl_m)
 
-# Fix Arrow serialization by stringifying object columns cleanly
 for col in bench_df.columns:
     bench_df[col] = bench_df[col].astype(str)
 
