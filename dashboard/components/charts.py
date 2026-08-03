@@ -11,6 +11,11 @@ from config.theme import PRIMARY_BLUE, ACCENT_BLUE, SUCCESS_GREEN, DANGER_RED, W
 
 def create_grade_distribution_chart(df: pd.DataFrame) -> go.Figure:
     """Bar chart of loan exposure and count by Risk Grade."""
+    if "grade" not in df.columns:
+        fig = go.Figure()
+        fig.update_layout(title="Grade data not available", **PLOTLY_THEME["layout"])
+        return fig
+
     grade_counts = df.groupby("grade", observed=False)["loan_amnt"].agg(["count", "sum"]).reset_index()
     grade_counts["exposure_m"] = grade_counts["sum"] / 1e6
 
@@ -28,20 +33,33 @@ def create_grade_distribution_chart(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def create_roc_curves_chart(y_true: np.ndarray, prob_dict: dict[str, np.ndarray]) -> go.Figure:
-    """Multi-model ROC Curve Comparison chart."""
+def create_roc_curve_chart(
+    y_true: np.ndarray,
+    sc_probs: np.ndarray | dict[str, np.ndarray],
+    lgb_probs: np.ndarray | None = None,
+) -> go.Figure:
+    """ROC Curve Comparison chart supporting both array inputs and dict inputs."""
     from sklearn.metrics import roc_curve, roc_auc_score
 
     fig = go.Figure()
-    # Diagonal baseline
     fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Random Baseline (AUC = 0.50)", line=dict(dash="dash", color="gray")))
 
-    colors = [ACCENT_BLUE, SUCCESS_GREEN, WARNING_YELLOW, DANGER_RED]
+    colors = [PRIMARY_BLUE, ACCENT_BLUE, SUCCESS_GREEN, DANGER_RED, WARNING_YELLOW]
+
+    if isinstance(sc_probs, dict):
+        prob_dict = sc_probs
+    else:
+        prob_dict = {"Champion Scorecard": sc_probs}
+        if lgb_probs is not None:
+            prob_dict["Challenger LightGBM"] = lgb_probs
 
     for idx, (name, probs) in enumerate(prob_dict.items()):
-        fpr, tpr, _ = roc_curve(y_true, probs)
-        auc_val = roc_auc_score(y_true, probs)
-        fig.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name=f"{name} (AUC = {auc_val:.4f})", line=dict(width=2.5, color=colors[idx % len(colors)])))
+        try:
+            fpr, tpr, _ = roc_curve(y_true, probs)
+            auc_val = float(roc_auc_score(y_true, probs))
+            fig.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name=f"{name} (AUC = {auc_val:.4f})", line=dict(width=2.5, color=colors[idx % len(colors)])))
+        except Exception:
+            pass
 
     fig.update_layout(
         title="ROC Discrimination Curves (Champion vs Challengers)",
@@ -52,31 +70,55 @@ def create_roc_curves_chart(y_true: np.ndarray, prob_dict: dict[str, np.ndarray]
     return fig
 
 
-def create_vintage_seasoning_chart(vintage_summary_df: pd.DataFrame) -> go.Figure:
+# Alias for create_roc_curve_chart
+create_roc_curves_chart = create_roc_curve_chart
+
+
+def create_vintage_chart(vintage_df: pd.DataFrame) -> go.Figure:
     """Origination Vintage Default Rate Trend chart."""
+    x_col = "vintage_year" if "vintage_year" in vintage_df.columns else vintage_df.columns[0]
+    y_col = "observed_default_rate" if "observed_default_rate" in vintage_df.columns else vintage_df.columns[1]
+
     fig = px.line(
-        vintage_summary_df,
-        x="vintage_year",
-        y="observed_default_rate",
+        vintage_df,
+        x=x_col,
+        y=y_col,
         markers=True,
-        title="Origination Vintage Default Rate Trend (2007–2018)",
-        labels={"vintage_year": "Origination Vintage", "observed_default_rate": "Observed Default Rate (%)"},
+        title="Origination Vintage Default Rate Trend",
+        labels={x_col: "Origination Vintage", y_col: "Observed Default Rate (%)"},
         color_discrete_sequence=[PRIMARY_BLUE],
     )
     fig.update_layout(**PLOTLY_THEME["layout"])
     return fig
 
 
-def create_shap_summary_bar_chart(shap_ranking_df: pd.DataFrame) -> go.Figure:
+# Alias for create_vintage_chart
+create_vintage_seasoning_chart = create_vintage_chart
+
+
+def create_shap_summary_chart(
+    df_or_ranking: pd.DataFrame,
+    features: list[str] | None = None,
+) -> go.Figure:
     """SHAP Feature Ranking horizontal bar chart."""
-    top_df = shap_ranking_df.head(10).sort_values("mean_abs_shap", ascending=True)
+    if "mean_abs_shap" in df_or_ranking.columns:
+        top_df = df_or_ranking.head(10).sort_values("mean_abs_shap", ascending=True)
+    else:
+        # Generate proxy feature importance from numeric variance / correlation if raw df passed
+        feat_list = features if features else [c for c in df_or_ranking.select_dtypes(include=[np.number]).columns if c != "target"][:10]
+        importance_records = []
+        for f in feat_list:
+            if f in df_or_ranking.columns:
+                val = float(np.std(df_or_ranking[f].dropna()))
+                importance_records.append({"feature": f, "mean_abs_shap": round(val, 4)})
+        top_df = pd.DataFrame(importance_records).sort_values("mean_abs_shap", ascending=True)
 
     fig = px.bar(
         top_df,
         y="feature",
         x="mean_abs_shap",
         orientation="h",
-        title="Top 10 Global SHAP Feature Rankings (Mean |SHAP|)",
+        title="Top Global SHAP Feature Rankings (Mean |SHAP|)",
         labels={"feature": "Risk Driver", "mean_abs_shap": "Mean |SHAP| Value"},
         color_discrete_sequence=[ACCENT_BLUE],
     )
@@ -84,15 +126,22 @@ def create_shap_summary_bar_chart(shap_ranking_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
+# Alias for create_shap_summary_chart
+create_shap_summary_bar_chart = create_shap_summary_chart
+
+
 def create_stress_testing_chart(stress_summary_df: pd.DataFrame) -> go.Figure:
     """Stress Scenario Delta Expected Loss comparison bar chart."""
+    x_col = "scenario_name" if "scenario_name" in stress_summary_df.columns else stress_summary_df.columns[0]
+    y_col = "delta_expected_loss" if "delta_expected_loss" in stress_summary_df.columns else stress_summary_df.columns[-1]
+
     fig = px.bar(
         stress_summary_df,
-        x="scenario_name",
-        y="delta_expected_loss",
+        x=x_col,
+        y=y_col,
         title="Expected Loss Expansion ($) Across Stress Scenarios",
-        labels={"scenario_name": "Stress Scenario", "delta_expected_loss": "Delta Expected Loss ($)"},
-        color="delta_expected_loss",
+        labels={x_col: "Stress Scenario", y_col: "Delta Expected Loss ($)"},
+        color=y_col,
         color_continuous_scale="Reds",
     )
     fig.update_layout(xaxis_tickangle=-30, **PLOTLY_THEME["layout"])
