@@ -124,7 +124,7 @@ docker-compose up -d --build
 
 - [Master Production Certification](docs/Enterprise_Certification.md): Official Tier-1 production deployment sign-off certificate.
 - [Publication Readiness Report](docs/Publication_Readiness_Report.md): Final GitHub publication audit, LaTeX rendering verification, and backend testing sign-off.
-- [Enterprise Audit & Code Review Report](docs/Enterprise_Audit_Report.md): Master enterprise code review, decision log, SR 11-7 audit, 16-dimension scorecard, and improvement roadmap.
+- [Streamlit Frontend Architecture Blueprint](docs/Frontend_Architecture.md): Standardized Pure-Python Streamlit frontend design manual and reusable project template.
 - [Dataset Limitations Report](docs/Dataset_Limitations.md): Transparent audit of LendingClub dataset capabilities, limitations, and real banking data requirements.
 - [Enterprise Assumptions Register](docs/Enterprise_Assumptions.md): Master register of business, statistical, econometric, and modeling assumptions.
 - [Master Decision Log](docs/Decision_Log.md): Detailed technical, business, and regulatory rationale for major project decisions.

@@ -1,17 +1,15 @@
-"""Page 6: Model Monitoring."""
+"""Page 06: Model Monitoring."""
 
 import sys
 from pathlib import Path
-import numpy as np
 import pandas as pd
 import streamlit as st
 
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd() / "dashboard"))
 
-from utils.data_loader import load_credit_data
-from utils.model_loader import load_trained_models
-from components.kpi_cards import render_traffic_light_header
+from utils.loaders import load_credit_data, load_trained_models
+from components.cards import render_traffic_light_header
 from components.tables import render_styled_table
 from monitoring.psi import compute_segment_psi_table
 from monitoring.csi import build_portfolio_csi_report

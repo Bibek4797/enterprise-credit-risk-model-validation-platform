@@ -1,4 +1,4 @@
-"""Page 5: Stress Testing & Scenario Analysis."""
+"""Page 05: Stress Testing & Scenario Simulator."""
 
 import sys
 from pathlib import Path
@@ -9,8 +9,7 @@ import streamlit as st
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd() / "dashboard"))
 
-from utils.data_loader import load_credit_data
-from utils.model_loader import load_trained_models
+from utils.loaders import load_credit_data, load_trained_models
 from components.charts import create_stress_testing_chart
 from components.tables import render_styled_table
 from stress_testing.stress_engine import run_portfolio_stress_test

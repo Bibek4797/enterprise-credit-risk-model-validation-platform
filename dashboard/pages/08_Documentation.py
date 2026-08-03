@@ -1,4 +1,4 @@
-"""Page 8: Reports & Governance Document Repository."""
+"""Page 08: Documentation & Reports Center."""
 
 import sys
 from pathlib import Path

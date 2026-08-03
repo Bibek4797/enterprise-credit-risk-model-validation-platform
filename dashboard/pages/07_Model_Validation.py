@@ -1,4 +1,4 @@
-"""Page 7: Deep Learning Benchmark."""
+"""Page 07: Model Validation & Triangulation Benchmark."""
 
 import sys
 from pathlib import Path
@@ -10,9 +10,9 @@ sys.path.append(str(Path.cwd() / "dashboard"))
 from components.tables import render_styled_table
 from deep_learning.evaluation import build_triangulation_benchmark_table
 
-st.set_page_config(page_title="Deep Learning Benchmark", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Model Validation", page_icon="🤖", layout="wide")
 
-st.title("🤖 Deep Learning Triangulation Benchmark")
+st.title("🤖 Independent Model Validation & Benchmark Triangulation")
 
 st.warning("⚠️ **Executive Decision: REJECT Deep Learning for Production Credit Origination**")
 
@@ -26,12 +26,17 @@ ml_m = {"roc_auc": 0.7482, "gini_index": 0.4964, "ks_statistic_pct": 38.42, "bri
 dl_m = {"roc_auc": 0.7312, "gini_index": 0.4624, "ks_statistic_pct": 35.80, "brier_score": 0.13950, "training_time": 45.2, "latency_ms": 12.8}
 
 bench_df = build_triangulation_benchmark_table(stat_m, ml_m, dl_m)
-render_styled_table(bench_df, "Master Model Triangulation Benchmark Matrix")
+
+# Fix Arrow serialization by stringifying object columns cleanly
+for col in bench_df.columns:
+    bench_df[col] = bench_df[col].astype(str)
+
+render_styled_table(bench_df)
 
 st.markdown("---")
 
 st.markdown("### 📋 Executive Business & Regulatory Rationale")
-st.markdown("""
+st.markdown(r"""
 1. **Sub-optimal Discrimination Power**: PyTorch MLP ($\text{AUC} = 0.7312$) fails to surpass LightGBM ($\text{AUC} = 0.7482$), sacrificing $1.70\%$ of ROC-AUC discrimination power.
 2. **Regulatory Black-Box Opacity**: Multilayer Perceptrons create dense multi-layer interactions that violate FCRA Adverse Action reason code generation guidelines.
 3. **Operational & Deployment Complexity**: PyTorch introduces heavy C++ runtime dependencies (`libtorch`) and ONNX serialization overhead compared to native tree-based or scorecard implementations.
