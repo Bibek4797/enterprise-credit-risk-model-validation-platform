@@ -81,3 +81,8 @@ def calculate_vintage_seasoning_curves(
     curves["cum_default_rate_pct"] = (curves.groupby(vintage_col)["cumulative_defaults"].cumsum() / curves.groupby(vintage_col)["total_loans"].transform("sum") * 100.0).round(2)
 
     return curves
+
+
+# Alias for backward compatibility
+generate_vintage_summary = build_vintage_summary
+
