@@ -2,6 +2,8 @@
 
 import sys
 from pathlib import Path
+import pandas as pd
+import numpy as np
 import streamlit as st
 
 file_path = Path(__file__).resolve()
