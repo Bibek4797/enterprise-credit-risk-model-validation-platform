@@ -1,4 +1,4 @@
-"""Page 08: Documentation & Reports Center."""
+"""Page 07: Documentation & Reports Center."""
 
 import sys
 from pathlib import Path
@@ -14,6 +14,8 @@ for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
 st.set_page_config(page_title="Governance Reports", page_icon="📄", layout="wide")
 
 st.title("📄 Governance Reports & Audit Documentation Center")
+st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III)")
+st.markdown("---")
 
 st.markdown("""
 Access, inspect, and download institutional model risk governance reports, validation audits, model cards, and executive briefs.
