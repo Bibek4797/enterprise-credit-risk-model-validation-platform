@@ -55,7 +55,9 @@ retrain_decision = evaluate_retraining_triggers(
     max_feature_csi=0.05,
 )
 
-if retrain_decision["retrain_recommended"]:
+is_retrain = retrain_decision.get("is_retraining_required", retrain_decision.get("retrain_recommended", False))
+
+if is_retrain:
     render_traffic_light_header(status="RED", message="CRITICAL DRIFT: Model Retraining Required Immediately")
 else:
     render_traffic_light_header(status="GREEN", message="STABLE: Model Stability Criteria Satisfied (PSI < 0.10)")
@@ -65,4 +67,5 @@ col_m1, col_m2 = st.columns(2)
 with col_m1:
     render_kpi_card("Overall Portfolio PSI", f"{retrain_decision['psi_value']:.4f}")
 with col_m2:
-    render_kpi_card("Retraining Recommendation", retrain_decision["recommended_action"])
+    action_text = retrain_decision.get("governance_action", retrain_decision.get("recommended_action", "N/A"))
+    render_kpi_card("Retraining Recommendation", action_text)

@@ -52,22 +52,12 @@ def evaluate_retraining_triggers(
     return {
         "traffic_light_status": traffic_light,
         "is_retraining_required": is_retraining_required,
+        "retrain_recommended": is_retraining_required,
         "psi_value": round(psi_value, 4),
         "current_auc": round(current_auc, 4),
         "auc_degradation": round(auc_drop, 4),
         "current_ks_pct": round(current_ks_pct, 2),
         "triggers_fired": triggers_fired,
         "governance_action": governance_action,
-    }
-
-
-def generate_champion_replacement_protocol() -> dict[str, str]:
-    """Generate standardized SR 11-7 Champion/Challenger Replacement Protocol steps."""
-    return {
-        "step_1_trigger": "Automated alert triggered (RED status or quarterly scheduled review).",
-        "step_2_recalibration": "Model Development Team re-runs WoE binning and fits updated Candidate Challenger model on recent 24-month dataset.",
-        "step_3_benchmarking": "Evaluate Candidate Challenger against Operational Champion on 6-month Out-Of-Time validation set.",
-        "step_4_independent_validation": "Independent Model Validation (IMV) team audits Challenger for discrimination, calibration, and ECOA fair lending.",
-        "step_5_committee_approval": "Model Risk Committee (MRC) reviews validation package and grants formal sign-off.",
-        "step_6_production_cutover": "Production API endpoint updated to new Champion model version; legacy model archived in Governance Registry.",
+        "recommended_action": governance_action,
     }
