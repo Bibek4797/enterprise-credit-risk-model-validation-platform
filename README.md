@@ -110,8 +110,17 @@ python -m pytest tests/
 ### 3. Launching Streamlit Analytics Dashboard
 ```bash
 streamlit run dashboard/app.py
+# Or launch via root entrypoint:
+streamlit run streamlit_app.py
 ```
-*(Access multi-page dashboard at `http://localhost:8501`)*.
+*(Access multi-page dashboard locally at `http://localhost:8501`)*.
+
+### 🌐 Streamlit Community Cloud Public Deployment
+To deploy or access on Streamlit Community Cloud:
+- **Repository**: `Bibek4797/enterprise-credit-risk-model-validation-platform`
+- **Branch**: `main`
+- **Main file path**: `streamlit_app.py` (or `dashboard/app.py`)
+
 
 ### 4. Running Docker Container
 ```bash

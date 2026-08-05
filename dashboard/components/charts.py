@@ -107,19 +107,12 @@ create_vintage_seasoning_chart = create_vintage_chart
 
 
 def create_shap_summary_chart(
-    df_or_ranking: pd.DataFrame | None,
+    df_or_ranking: pd.DataFrame,
     features: list[str] | None = None,
 ) -> go.Figure:
     """SHAP Feature Ranking horizontal bar chart."""
-    if df_or_ranking is None or getattr(df_or_ranking, "empty", True):
-        top_df = pd.DataFrame({
-            "feature": ["fico_range_low", "dti", "int_rate", "annual_inc", "revol_util", "inq_last_6mths"],
-            "mean_abs_shap": [0.425, 0.381, 0.312, 0.285, 0.198, 0.142],
-        }).sort_values("mean_abs_shap", ascending=True)
-    elif "mean_abs_shap" in df_or_ranking.columns:
+    if "mean_abs_shap" in df_or_ranking.columns:
         top_df = df_or_ranking.head(10).sort_values("mean_abs_shap", ascending=True)
-    elif "importance" in df_or_ranking.columns:
-        top_df = df_or_ranking.head(10).rename(columns={"importance": "mean_abs_shap"}).sort_values("mean_abs_shap", ascending=True)
     else:
         feat_list = features if features else [c for c in df_or_ranking.select_dtypes(include=[np.number]).columns if c != "target"][:10]
         importance_records = []
@@ -140,7 +133,6 @@ def create_shap_summary_chart(
     )
     fig.update_layout(**PLOTLY_THEME["layout"])
     return fig
-
 
 
 create_shap_summary_bar_chart = create_shap_summary_chart

@@ -1,4 +1,4 @@
-"""Page 04: Macro Stress Testing."""
+"""Page 04: Macro Stress Testing & Scenario Simulator."""
 
 import sys
 from pathlib import Path
@@ -16,52 +16,78 @@ for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
 try:
     from utils.loaders import load_credit_data, load_trained_models
     from components.cards import render_kpi_card
+    from components.charts import create_stress_testing_chart
     from components.tables import render_styled_table
 except ImportError:
     from dashboard.utils.loaders import load_credit_data, load_trained_models
     from dashboard.components.cards import render_kpi_card
+    from dashboard.components.charts import create_stress_testing_chart
     from dashboard.components.tables import render_styled_table
 
 from stress_testing.stress_engine import run_portfolio_stress_test
 
 st.set_page_config(page_title="Stress Testing", page_icon="⚡", layout="wide")
 
-st.title("⚡ Enterprise Macro Stress Testing & Capital Adequacy")
-st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III)")
+st.title("⚡ Enterprise Macro Stress Testing & Scenario Simulator")
+st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III / CCAR)")
 st.markdown("---")
 
 df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
+feature_cols = models["features"]
 
-predict_fn = models["predict_lgb"]
-features = models["features"]
+st.markdown("### 📊 Macroeconomic Scenario Expansion Response Suite")
+stress_summary = run_portfolio_stress_test(models["predict_scorecard"], df, feature_cols, lgd=0.95)
 
-stress_df = run_portfolio_stress_test(predict_fn, df, features)
+chart_col, table_col = st.columns([1.3, 1])
 
-st.markdown("### 📊 Macroeconomic Scenario Expansion Summary")
-render_styled_table(stress_df)
+with chart_col:
+    fig_stress = create_stress_testing_chart(stress_summary)
+    st.plotly_chart(fig_stress, use_container_width=True)
+
+with table_col:
+    st.markdown("### 📋 Scenario Response Table")
+    render_styled_table(stress_summary[["scenario_name", "mean_predicted_pd", "delta_pd_pct_points", "delta_expected_loss"]].head(8))
 
 st.markdown("---")
-st.markdown("### 🎛️ Interactive Macro Economic Shock Simulator")
+st.markdown("### 🎛️ Interactive Custom Macro Economic Shock Simulator")
 
-income_shock_pct = st.slider("Borrower Income Shock (%)", min_value=-40.0, max_value=10.0, value=-20.0, step=5.0)
-int_rate_shock_pts = st.slider("Interest Rate Shift (+ Percentage Points)", min_value=0.0, max_value=8.0, value=3.0, step=0.5)
-
-shocked_df = df.copy()
-if "annual_inc" in shocked_df.columns:
-    shocked_df["annual_inc"] = shocked_df["annual_inc"] * (1.0 + (income_shock_pct / 100.0))
-if "int_rate" in shocked_df.columns:
-    shocked_df["int_rate"] = shocked_df["int_rate"] + int_rate_shock_pts
-
-base_pd = predict_fn(df).mean()
-shocked_pd = predict_fn(shocked_df).mean()
-delta_pd = shocked_pd - base_pd
-
-col_s1, col_s2, col_s3 = st.columns(3)
-
+col_s1, col_s2, col_s3, col_s4 = st.columns(4)
 with col_s1:
-    render_kpi_card("Baseline Mean PD", f"{base_pd:.2%}")
+    inc_shift = st.slider("Borrower Income Shock (%)", min_value=-50, max_value=20, value=-20, step=5)
 with col_s2:
-    render_kpi_card("Stressed Mean PD", f"{shocked_pd:.2%}", is_positive_good=False)
+    rate_shift = st.slider("Interest Rate Shift (bps)", min_value=-300, max_value=800, value=300, step=50)
 with col_s3:
-    render_kpi_card("Delta PD Shift", f"{delta_pd * 100:+.2f}% pts", is_positive_good=False)
+    dti_shift = st.slider("DTI Shift (%)", min_value=-20, max_value=50, value=15, step=5)
+with col_s4:
+    fico_shift = st.slider("FICO Shift (Points)", min_value=-100, max_value=50, value=-30, step=5)
+
+stressed_custom = df.copy()
+if "annual_inc" in stressed_custom.columns:
+    stressed_custom["annual_inc"] = stressed_custom["annual_inc"] * (1.0 + inc_shift / 100.0)
+if "int_rate" in stressed_custom.columns:
+    stressed_custom["int_rate"] = stressed_custom["int_rate"] + (rate_shift / 100.0)
+if "dti" in stressed_custom.columns:
+    stressed_custom["dti"] = stressed_custom["dti"] * (1.0 + dti_shift / 100.0)
+if "fico_range_low" in stressed_custom.columns:
+    stressed_custom["fico_range_low"] = np.maximum(300.0, stressed_custom["fico_range_low"] + fico_shift)
+
+base_pd = float(np.mean(models["predict_scorecard"](df)))
+custom_pd = float(np.mean(models["predict_scorecard"](stressed_custom)))
+delta_pd_pts = (custom_pd - base_pd) * 100.0
+
+total_exp = float(df["loan_amnt"].sum())
+base_el = total_exp * base_pd * 0.95
+custom_el = total_exp * custom_pd * 0.95
+delta_el = custom_el - base_el
+
+m1, m2, m3, m4 = st.columns(4)
+with m1:
+    render_kpi_card("Baseline Mean PD", f"{base_pd*100:.2f}%")
+with m2:
+    render_kpi_card("Stressed Mean PD", f"{custom_pd*100:.2f}%", is_positive_good=False)
+with m3:
+    render_kpi_card("Baseline Expected Loss (EL)", f"${base_el/1e6:,.2f}M")
+with m4:
+    render_kpi_card("Stressed Expected Loss (EL)", f"${custom_el/1e6:,.2f}M", is_positive_good=False)
+

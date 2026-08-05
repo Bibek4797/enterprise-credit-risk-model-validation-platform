@@ -28,45 +28,49 @@ from explainability.adverse_action import generate_adverse_action_reasons
 
 st.set_page_config(page_title="Explainable AI", page_icon="🔍", layout="wide")
 
-st.title("🔍 Explainable AI (XAI) & Regulatory FCRA Adverse Action")
-st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III)")
+st.title("🔍 Explainable AI (XAI) & FCRA Adverse Action Engine")
+st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III / FCRA / ECOA)")
 st.markdown("---")
 
-df = load_credit_data(sample_size=20000)
+df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
+features = models["features"]
 
-st.markdown("### 🌐 Global TreeSHAP Feature Importance Ranking")
-fig_shap = create_shap_summary_chart(models.get("shap_summary_df"), features=models.get("features"))
-st.plotly_chart(fig_shap, use_container_width=True)
+tab_global, tab_local = st.tabs(["🌍 Global TreeSHAP Feature Ranking", "👤 Local Borrower FCRA Adverse Action Inspector"])
 
-st.markdown("---")
-st.markdown("### 📄 FCRA Adverse Action Decline Reason Code Generator")
+with tab_global:
+    st.markdown("### 📊 Global TreeSHAP Feature Importance Ranking")
+    fig_shap = create_shap_summary_chart(df, features)
+    st.plotly_chart(fig_shap, use_container_width=True)
 
-borrower_idx = st.number_input("Select Borrower Index for Individual Evaluation", min_value=0, max_value=len(df)-1, value=42)
+with tab_local:
+    st.markdown("### 👤 Local Borrower FCRA Adverse Action Inspector")
+    borrower_idx = st.number_input("Select Borrower Index for Individual Evaluation", min_value=0, max_value=len(df)-1, value=42, step=1)
 
-borrower_row = df.iloc[borrower_idx]
-lgb_pred_pd = models["predict_lgb"](df.iloc[[borrower_idx]])[0]
+    borrower_row = df.iloc[borrower_idx]
+    lgb_pred_pd = float(models["predict_lgb"](df.iloc[[borrower_idx]])[0])
 
-col_b1, col_b2, col_b3 = st.columns(3)
+    col_b1, col_b2, col_b3 = st.columns(3)
 
-with col_b1:
-    render_kpi_card("Borrower FICO Score", f"{int(borrower_row.get('fico_range_low', 700))}")
-with col_b2:
-    render_kpi_card("Borrower DTI Ratio", f"{borrower_row.get('dti', 15.0):.2f}%")
-with col_b3:
-    render_kpi_card("Predicted Default Prob (PD)", f"{lgb_pred_pd:.2%}", is_positive_good=False)
+    with col_b1:
+        render_kpi_card("Borrower FICO Score", f"{int(borrower_row.get('fico_range_low', 700))}")
+    with col_b2:
+        render_kpi_card("Borrower DTI Ratio", f"{borrower_row.get('dti', 15.0):.2f}%")
+    with col_b3:
+        render_kpi_card("Predicted Default Prob (PD)", f"{lgb_pred_pd:.2%}", is_positive_good=False)
 
-st.markdown("#### 📋 FCRA Closed-Form Decline Reason Codes")
+    st.markdown("#### 📋 FCRA Closed-Form Decline Reason Codes")
 
-sample_woe_dict = {
-    "dti": 0.45,
-    "int_rate": 0.38,
-    "revol_util": 0.29,
-    "annual_inc": -0.12,
-    "fico_range_low": -0.40,
-}
+    sample_woe_dict = {
+        "dti": 0.45,
+        "int_rate": 0.38,
+        "revol_util": 0.29,
+        "annual_inc": -0.12,
+        "fico_range_low": -0.40,
+    }
 
-reasons = generate_adverse_action_reasons(sample_woe_dict, top_n=4)
-reasons_df = pd.DataFrame(reasons)
+    reasons = generate_adverse_action_reasons(sample_woe_dict, top_n=4)
+    reasons_df = pd.DataFrame(reasons)
 
-render_styled_table(reasons_df)
+    render_styled_table(reasons_df)
+
