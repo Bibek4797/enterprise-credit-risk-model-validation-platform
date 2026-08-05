@@ -36,7 +36,7 @@ df = load_credit_data(sample_size=20000)
 models = load_trained_models(df)
 
 st.markdown("### 🌐 Global TreeSHAP Feature Importance Ranking")
-fig_shap = create_shap_summary_chart(models.get("shap_summary_df"))
+fig_shap = create_shap_summary_chart(models.get("shap_summary_df"), features=models.get("features"))
 st.plotly_chart(fig_shap, use_container_width=True)
 
 st.markdown("---")

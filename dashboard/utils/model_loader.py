@@ -65,6 +65,9 @@ def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
     def predict_lgb(df_input: pd.DataFrame) -> np.ndarray:
         return lgb_model["model"].predict_proba(df_input[lgb_cols].fillna(0))[:, 1]
 
+    # Build SHAP summary ranking DataFrame from feature importances
+    shap_summary_df = lgb_model["feature_importances"].rename(columns={"importance": "mean_abs_shap"}).copy()
+
     return {
         "logit_dict": logit_model,
         "lgb_dict": lgb_model,
@@ -72,4 +75,5 @@ def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
         "predict_scorecard": predict_scorecard,
         "predict_lgb": predict_lgb,
         "features": lgb_cols,
+        "shap_summary_df": shap_summary_df,
     }
