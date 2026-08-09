@@ -27,7 +27,15 @@ GRADE_COLORS = {
     "G": "#c084fc",   # purple
 }
 
-# ── Shared Plotly layout tokens ───────────────────────────────
+# ── Title style (applied separately to avoid kwarg conflict) ──
+# Usage: fig.update_layout(title={"text": "My Title", **TITLE_STYLE}, **PLOTLY_THEME["layout"])
+TITLE_STYLE = {
+    "font": {"color": TEXT_MAIN, "size": 14, "family": "Inter, Arial, sans-serif"},
+    "x": 0.02,
+    "xanchor": "left",
+}
+
+# ── Shared Plotly layout tokens (NO 'title' key here) ─────────
 PLOTLY_THEME = {
     "layout": {
         "font": {
@@ -61,11 +69,6 @@ PLOTLY_THEME = {
             "bordercolor": GRID_COLOR,
             "borderwidth": 1,
             "font": {"color": "#cbd5e1", "size": 11},
-        },
-        "title": {
-            "font": {"color": TEXT_MAIN, "size": 14, "family": "Inter, Arial, sans-serif"},
-            "x": 0.02,
-            "xanchor": "left",
         },
         "hoverlabel": {
             "bgcolor": "rgba(10,20,50,0.95)",
