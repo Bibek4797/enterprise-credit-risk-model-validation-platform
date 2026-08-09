@@ -1,4 +1,4 @@
-"""Page 02: Model Performance & Discrimination."""
+"""Page 02: Model Performance & Discrimination Engine."""
 
 import sys
 from pathlib import Path
@@ -15,86 +15,95 @@ for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
 
 try:
     from utils.loaders import load_credit_data, load_trained_models
+    from utils.ui_helpers import page_header, section_divider, label
     from components.cards import render_kpi_card
     from components.charts import create_roc_curve_chart
     from components.tables import render_styled_table
 except ImportError:
     from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.utils.ui_helpers import page_header, section_divider, label
     from dashboard.components.cards import render_kpi_card
     from dashboard.components.charts import create_roc_curve_chart
     from dashboard.components.tables import render_styled_table
 
 from validation.model_metrics import evaluate_binary_model
 
-st.set_page_config(page_title="Model Performance", page_icon="🎯", layout="wide")
+st.set_page_config(page_title="Model Performance | Credit Risk Platform", page_icon="🎯", layout="wide")
 
-st.title("🎯 Model Performance & Discrimination Engine")
-st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III)")
-st.markdown("---")
+page_header(
+    "🎯  Model Performance & Discrimination Engine",
+    "SR 11-7 · Basel III IRB — Champion vs Challenger Evaluation",
+)
 
 df = load_credit_data(sample_size=30000)
 models = load_trained_models(df)
 
-sc_preds = models["predict_scorecard"](df)
+sc_preds  = models["predict_scorecard"](df)
 lgb_preds = models["predict_lgb"](df)
-y_true = df["target"].values
+y_true    = df["target"].values
 
-sc_m = evaluate_binary_model(y_true, sc_preds)
+sc_m  = evaluate_binary_model(y_true, sc_preds)
 lgb_m = evaluate_binary_model(y_true, lgb_preds)
 
-col1, col2, col3, col4 = st.columns(4)
+# ── KPI Row ───────────────────────────────────────────────────
+label("Model Discrimination Metrics")
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+    render_kpi_card("Champion ROC-AUC", f"{sc_m['roc_auc']:.4f}", icon="🏆")
+with c2:
+    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}", icon="🤖")
+with c3:
+    render_kpi_card("Champion KS Stat", f"{sc_m['ks_statistic_pct']:.2f}%", icon="📊")
+with c4:
+    render_kpi_card("Challenger KS Stat", f"{lgb_m['ks_statistic_pct']:.2f}%", icon="📊")
 
-with col1:
-    render_kpi_card("Champion ROC-AUC", f"{sc_m['roc_auc']:.4f}")
-with col2:
-    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}")
-with col3:
-    render_kpi_card("Champion KS Statistic", f"{sc_m['ks_statistic_pct']:.2f}%")
-with col4:
-    render_kpi_card("Challenger KS Statistic", f"{lgb_m['ks_statistic_pct']:.2f}%")
+section_divider()
 
-st.markdown("---")
-
-col_roc, col_table = st.columns([1.5, 1])
+# ── ROC + Comparison ──────────────────────────────────────────
+col_roc, col_table = st.columns([1.6, 1], gap="large")
 
 with col_roc:
-    st.markdown("### 📉 Receiver Operating Characteristic (ROC) Curves")
+    label("Receiver Operating Characteristic (ROC) Curves")
     fig_roc = create_roc_curve_chart(y_true, sc_preds, lgb_preds)
     st.plotly_chart(fig_roc, use_container_width=True)
 
 with col_table:
-    st.markdown("### 📋 Model Comparison Summary")
+    label("Model Comparison Summary")
     comparison_df = pd.DataFrame([
         {
-            "Model Name": "Champion Scorecard (Logistic)",
+            "Model": "Champion Scorecard",
             "ROC-AUC": f"{sc_m['roc_auc']:.4f}",
             "Gini": f"{sc_m['gini_index']:.4f}",
             "KS (%)": f"{sc_m['ks_statistic_pct']:.2f}%",
-            "Brier Score": f"{sc_m['brier_score']:.5f}",
+            "Brier": f"{sc_m['brier_score']:.5f}",
         },
         {
-            "Model Name": "Challenger LightGBM",
+            "Model": "Challenger LightGBM",
             "ROC-AUC": f"{lgb_m['roc_auc']:.4f}",
             "Gini": f"{lgb_m['gini_index']:.4f}",
             "KS (%)": f"{lgb_m['ks_statistic_pct']:.2f}%",
-            "Brier Score": f"{lgb_m['brier_score']:.5f}",
+            "Brier": f"{lgb_m['brier_score']:.5f}",
         },
     ])
     render_styled_table(comparison_df)
 
-st.markdown("---")
-st.markdown("### 🎛️ Interactive Decision Cutoff Threshold Simulator")
+section_divider()
 
-cutoff = st.slider("Select Underwriting Decision Cutoff (Probability of Default)", min_value=0.05, max_value=0.50, value=0.20, step=0.01)
+# ── Cutoff Simulator ──────────────────────────────────────────
+label("Interactive Decision Cutoff Threshold Simulator")
+cutoff = st.slider(
+    "Underwriting Decision Cutoff — Probability of Default",
+    min_value=0.05, max_value=0.50, value=0.20, step=0.01,
+)
 
-approved_mask = lgb_preds <= cutoff
-approval_rate = approved_mask.mean() * 100
-bad_rate_approved = (y_true[approved_mask].mean() * 100) if approved_mask.sum() > 0 else 0.0
+approved_mask      = lgb_preds <= cutoff
+approval_rate      = approved_mask.mean() * 100
+bad_rate_approved  = (y_true[approved_mask].mean() * 100) if approved_mask.sum() > 0 else 0.0
 
-col_c1, col_c2, col_c3 = st.columns(3)
-with col_c1:
-    render_kpi_card("Decision Cutoff Threshold", f"{cutoff:.2%}")
-with col_c2:
-    render_kpi_card("Simulated Approval Rate", f"{approval_rate:.2f}%")
-with col_c3:
-    render_kpi_card("Approved Portfolio Bad Rate", f"{bad_rate_approved:.2f}%", is_positive_good=False)
+cc1, cc2, cc3 = st.columns(3)
+with cc1:
+    render_kpi_card("Decision Cutoff", f"{cutoff:.2%}", icon="🎚️")
+with cc2:
+    render_kpi_card("Simulated Approval Rate", f"{approval_rate:.2f}%", icon="✅")
+with cc3:
+    render_kpi_card("Approved Bad Rate", f"{bad_rate_approved:.2f}%", icon="❗", is_positive_good=False)

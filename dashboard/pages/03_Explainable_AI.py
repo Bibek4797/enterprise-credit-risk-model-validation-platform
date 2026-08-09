@@ -1,4 +1,4 @@
-"""Page 03: Explainable AI & FCRA Compliance."""
+"""Page 03: Explainable AI & FCRA Adverse Action Engine."""
 
 import sys
 from pathlib import Path
@@ -15,62 +15,71 @@ for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
 
 try:
     from utils.loaders import load_credit_data, load_trained_models
+    from utils.ui_helpers import page_header, section_divider, label
     from components.cards import render_kpi_card
     from components.charts import create_shap_summary_chart
     from components.tables import render_styled_table
 except ImportError:
     from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.utils.ui_helpers import page_header, section_divider, label
     from dashboard.components.cards import render_kpi_card
     from dashboard.components.charts import create_shap_summary_chart
     from dashboard.components.tables import render_styled_table
 
 from explainability.adverse_action import generate_adverse_action_reasons
 
-st.set_page_config(page_title="Explainable AI", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Explainable AI | Credit Risk Platform", page_icon="🔍", layout="wide")
 
-st.title("🔍 Explainable AI (XAI) & FCRA Adverse Action Engine")
-st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III / FCRA / ECOA)")
-st.markdown("---")
+page_header(
+    "🔍  Explainable AI (XAI) & FCRA Adverse Action Engine",
+    "SR 11-7 · FCRA · ECOA — Transparent Model Decisions",
+)
 
-df = load_credit_data(sample_size=30000)
-models = load_trained_models(df)
+df      = load_credit_data(sample_size=30000)
+models  = load_trained_models(df)
 features = models["features"]
 
-tab_global, tab_local = st.tabs(["🌍 Global TreeSHAP Feature Ranking", "👤 Local Borrower FCRA Adverse Action Inspector"])
+tab_global, tab_local = st.tabs([
+    "🌍  Global TreeSHAP Feature Ranking",
+    "👤  Local Borrower FCRA Adverse Action Inspector",
+])
 
+# ── Global Tab ────────────────────────────────────────────────
 with tab_global:
-    st.markdown("### 📊 Global TreeSHAP Feature Importance Ranking")
+    label("Global TreeSHAP Feature Importance (Top Risk Drivers)")
     fig_shap = create_shap_summary_chart(df, features)
     st.plotly_chart(fig_shap, use_container_width=True)
 
+# ── Local Tab ─────────────────────────────────────────────────
 with tab_local:
-    st.markdown("### 👤 Local Borrower FCRA Adverse Action Inspector")
-    borrower_idx = st.number_input("Select Borrower Index for Individual Evaluation", min_value=0, max_value=len(df)-1, value=42, step=1)
+    label("Individual Borrower Evaluation")
+    borrower_idx = st.number_input(
+        "Select Borrower Index for Individual Evaluation",
+        min_value=0, max_value=len(df) - 1, value=42, step=1,
+    )
 
     borrower_row = df.iloc[borrower_idx]
-    lgb_pred_pd = float(models["predict_lgb"](df.iloc[[borrower_idx]])[0])
+    lgb_pred_pd  = float(models["predict_lgb"](df.iloc[[borrower_idx]])[0])
 
-    col_b1, col_b2, col_b3 = st.columns(3)
+    cb1, cb2, cb3 = st.columns(3)
+    with cb1:
+        render_kpi_card("FICO Score", f"{int(borrower_row.get('fico_range_low', 700))}", icon="📊")
+    with cb2:
+        render_kpi_card("DTI Ratio", f"{borrower_row.get('dti', 15.0):.2f}%", icon="⚖️")
+    with cb3:
+        render_kpi_card("Predicted PD", f"{lgb_pred_pd:.2%}", icon="⚠️", is_positive_good=False)
 
-    with col_b1:
-        render_kpi_card("Borrower FICO Score", f"{int(borrower_row.get('fico_range_low', 700))}")
-    with col_b2:
-        render_kpi_card("Borrower DTI Ratio", f"{borrower_row.get('dti', 15.0):.2f}%")
-    with col_b3:
-        render_kpi_card("Predicted Default Prob (PD)", f"{lgb_pred_pd:.2%}", is_positive_good=False)
-
-    st.markdown("#### 📋 FCRA Closed-Form Decline Reason Codes")
+    section_divider()
+    label("FCRA Closed-Form Decline Reason Codes")
 
     sample_woe_dict = {
-        "dti": 0.45,
-        "int_rate": 0.38,
-        "revol_util": 0.29,
-        "annual_inc": -0.12,
+        "dti":           0.45,
+        "int_rate":      0.38,
+        "revol_util":    0.29,
+        "annual_inc":   -0.12,
         "fico_range_low": -0.40,
     }
 
-    reasons = generate_adverse_action_reasons(sample_woe_dict, top_n=4)
+    reasons    = generate_adverse_action_reasons(sample_woe_dict, top_n=4)
     reasons_df = pd.DataFrame(reasons)
-
     render_styled_table(reasons_df)
-

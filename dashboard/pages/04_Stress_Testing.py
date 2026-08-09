@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-import pandas as pd
 import numpy as np
 import streamlit as st
 
@@ -15,79 +14,83 @@ for d in [str(root_dir), str(dash_dir), str(root_dir / "src")]:
 
 try:
     from utils.loaders import load_credit_data, load_trained_models
+    from utils.ui_helpers import page_header, section_divider, label
     from components.cards import render_kpi_card
     from components.charts import create_stress_testing_chart
     from components.tables import render_styled_table
 except ImportError:
     from dashboard.utils.loaders import load_credit_data, load_trained_models
+    from dashboard.utils.ui_helpers import page_header, section_divider, label
     from dashboard.components.cards import render_kpi_card
     from dashboard.components.charts import create_stress_testing_chart
     from dashboard.components.tables import render_styled_table
 
 from stress_testing.stress_engine import run_portfolio_stress_test
 
-st.set_page_config(page_title="Stress Testing", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="Stress Testing | Credit Risk Platform", page_icon="⚡", layout="wide")
 
-st.title("⚡ Enterprise Macro Stress Testing & Scenario Simulator")
-st.caption("Enterprise Credit Risk Analytics & Model Risk Governance Platform (SR 11-7 / Basel III / CCAR)")
-st.markdown("---")
+page_header(
+    "⚡  Enterprise Macro Stress Testing & Scenario Simulator",
+    "SR 11-7 · Basel III · CCAR — Adverse Scenario Analysis",
+)
 
-df = load_credit_data(sample_size=30000)
-models = load_trained_models(df)
+df          = load_credit_data(sample_size=30000)
+models      = load_trained_models(df)
 feature_cols = models["features"]
 
-st.markdown("### 📊 Macroeconomic Scenario Expansion Response Suite")
+# ── Pre-defined Stress Scenarios ──────────────────────────────
+label("Macroeconomic Scenario Expansion Response Suite")
 stress_summary = run_portfolio_stress_test(models["predict_scorecard"], df, feature_cols, lgd=0.95)
 
-chart_col, table_col = st.columns([1.3, 1])
-
+chart_col, table_col = st.columns([1.4, 1], gap="large")
 with chart_col:
     fig_stress = create_stress_testing_chart(stress_summary)
     st.plotly_chart(fig_stress, use_container_width=True)
-
 with table_col:
-    st.markdown("### 📋 Scenario Response Table")
-    render_styled_table(stress_summary[["scenario_name", "mean_predicted_pd", "delta_pd_pct_points", "delta_expected_loss"]].head(8))
+    label("Scenario Response Table")
+    render_styled_table(
+        stress_summary[["scenario_name", "mean_predicted_pd", "delta_pd_pct_points", "delta_expected_loss"]].head(8)
+    )
 
-st.markdown("---")
-st.markdown("### 🎛️ Interactive Custom Macro Economic Shock Simulator")
+section_divider()
 
-col_s1, col_s2, col_s3, col_s4 = st.columns(4)
-with col_s1:
-    inc_shift = st.slider("Borrower Income Shock (%)", min_value=-50, max_value=20, value=-20, step=5)
-with col_s2:
-    rate_shift = st.slider("Interest Rate Shift (bps)", min_value=-300, max_value=800, value=300, step=50)
-with col_s3:
-    dti_shift = st.slider("DTI Shift (%)", min_value=-20, max_value=50, value=15, step=5)
-with col_s4:
-    fico_shift = st.slider("FICO Shift (Points)", min_value=-100, max_value=50, value=-30, step=5)
+# ── Interactive Shock Simulator ───────────────────────────────
+label("Interactive Custom Macroeconomic Shock Simulator")
 
-stressed_custom = df.copy()
-if "annual_inc" in stressed_custom.columns:
-    stressed_custom["annual_inc"] = stressed_custom["annual_inc"] * (1.0 + inc_shift / 100.0)
-if "int_rate" in stressed_custom.columns:
-    stressed_custom["int_rate"] = stressed_custom["int_rate"] + (rate_shift / 100.0)
-if "dti" in stressed_custom.columns:
-    stressed_custom["dti"] = stressed_custom["dti"] * (1.0 + dti_shift / 100.0)
-if "fico_range_low" in stressed_custom.columns:
-    stressed_custom["fico_range_low"] = np.maximum(300.0, stressed_custom["fico_range_low"] + fico_shift)
+cs1, cs2, cs3, cs4 = st.columns(4)
+with cs1:
+    inc_shift  = st.slider("Income Shock (%)", -50, 20, -20, 5)
+with cs2:
+    rate_shift = st.slider("Rate Shift (bps)", -300, 800, 300, 50)
+with cs3:
+    dti_shift  = st.slider("DTI Shift (%)", -20, 50, 15, 5)
+with cs4:
+    fico_shift = st.slider("FICO Shift (pts)", -100, 50, -30, 5)
 
-base_pd = float(np.mean(models["predict_scorecard"](df)))
-custom_pd = float(np.mean(models["predict_scorecard"](stressed_custom)))
-delta_pd_pts = (custom_pd - base_pd) * 100.0
+stressed = df.copy()
+if "annual_inc"    in stressed.columns:
+    stressed["annual_inc"]    = stressed["annual_inc"] * (1.0 + inc_shift / 100.0)
+if "int_rate"      in stressed.columns:
+    stressed["int_rate"]      = stressed["int_rate"] + (rate_shift / 100.0)
+if "dti"           in stressed.columns:
+    stressed["dti"]           = stressed["dti"] * (1.0 + dti_shift / 100.0)
+if "fico_range_low" in stressed.columns:
+    stressed["fico_range_low"] = np.maximum(300.0, stressed["fico_range_low"] + fico_shift)
 
-total_exp = float(df["loan_amnt"].sum())
-base_el = total_exp * base_pd * 0.95
-custom_el = total_exp * custom_pd * 0.95
-delta_el = custom_el - base_el
+base_pd    = float(np.mean(models["predict_scorecard"](df)))
+custom_pd  = float(np.mean(models["predict_scorecard"](stressed)))
+total_exp  = float(df["loan_amnt"].sum())
+base_el    = total_exp * base_pd * 0.95
+custom_el  = total_exp * custom_pd * 0.95
 
+section_divider()
+label("Shock Impact Results")
 m1, m2, m3, m4 = st.columns(4)
 with m1:
-    render_kpi_card("Baseline Mean PD", f"{base_pd*100:.2f}%")
+    render_kpi_card("Baseline Mean PD", f"{base_pd * 100:.2f}%", icon="📊")
 with m2:
-    render_kpi_card("Stressed Mean PD", f"{custom_pd*100:.2f}%", is_positive_good=False)
+    render_kpi_card("Stressed Mean PD", f"{custom_pd * 100:.2f}%", icon="⚡", is_positive_good=False)
 with m3:
-    render_kpi_card("Baseline Expected Loss (EL)", f"${base_el/1e6:,.2f}M")
+    render_kpi_card("Baseline EL", f"${base_el / 1e6:,.2f}M", icon="💼")
 with m4:
-    render_kpi_card("Stressed Expected Loss (EL)", f"${custom_el/1e6:,.2f}M", is_positive_good=False)
-
+    render_kpi_card("Stressed EL", f"${custom_el / 1e6:,.2f}M", icon="🔥", is_positive_good=False)
