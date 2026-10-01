@@ -204,11 +204,64 @@ def create_stress_testing_chart(stress_summary_df: pd.DataFrame) -> go.Figure:
         stress_summary_df, x=x_col, y=y_col,
         labels={x_col: "Stress Scenario", y_col: "Delta Expected Loss ($)"},
         color=y_col,
-        color_continuous_scale=[[0, "#7c3aed"], [0.5, "#ef4444"], [1.0, "#dc2626"]],
+        color_continuous_scale=[[0, "#3b82f6"], [0.5, "#f59e0b"], [1.0, "#ef4444"]],
     )
     fig.update_traces(marker_line_width=0)
-    fig.update_layout(xaxis_tickangle=-30, coloraxis_showscale=False)
-    return _apply_theme(fig, "Expected Loss Expansion ($) Across Stress Scenarios")
+    fig.update_layout(xaxis_tickangle=-15, coloraxis_showscale=False)
+    return _apply_theme(fig, "Expected Loss Expansion Across CCAR Fed Scenarios")
+
+
+def create_scurve_transmission_chart(delta_b0: float = 0.80) -> go.Figure:
+    """Plot non-linear S-curve transmission showing differential borrower impact."""
+    p_base = np.linspace(0.001, 0.999, 300)
+    z_base = np.log(p_base / (1.0 - p_base))
+    z_stressed = z_base + delta_b0
+    p_stressed = 1.0 / (1.0 + np.exp(-z_stressed))
+
+    fig = go.Figure()
+
+    # Diagonal 45-degree reference line (No stress)
+    fig.add_trace(go.Scatter(
+        x=p_base * 100, y=p_base * 100, mode="lines",
+        name="No Stress Baseline (45° Line)",
+        line=dict(color="#64748b", dash="dash", width=1.5),
+    ))
+
+    # Stressed S-curve
+    fig.add_trace(go.Scatter(
+        x=p_base * 100, y=p_stressed * 100, mode="lines",
+        name=f"Stressed Transmission Curve (Δβ₀ = {delta_b0:+.2f})",
+        line=dict(color="#ef4444", width=3),
+    ))
+
+    # Prime borrower annotation (PD = 1.0% -> 2.2%)
+    p_prime = 0.01
+    p_prime_str = 1.0 / (1.0 + np.exp(-(np.log(p_prime / (1.0 - p_prime)) + delta_b0)))
+    fig.add_trace(go.Scatter(
+        x=[p_prime * 100], y=[p_prime_str * 100], mode="markers+text",
+        name="Prime Borrower (PD=1%)",
+        text=[f"Prime: 1.0% → {p_prime_str*100:.1f}% (+{p_prime_str*100 - 1.0:.1f}%)"],
+        textposition="top left",
+        marker=dict(size=10, color="#10b981"),
+    ))
+
+    # Subprime borrower annotation (PD = 20.0% -> 35.8%)
+    p_sub = 0.20
+    p_sub_str = 1.0 / (1.0 + np.exp(-(np.log(p_sub / (1.0 - p_sub)) + delta_b0)))
+    fig.add_trace(go.Scatter(
+        x=[p_sub * 100], y=[p_sub_str * 100], mode="markers+text",
+        name="Subprime Borrower (PD=20%)",
+        text=[f"Subprime: 20.0% → {p_sub_str*100:.1f}% (+{p_sub_str*100 - 20.0:.1f}%)"],
+        textposition="bottom right",
+        marker=dict(size=10, color="#f59e0b"),
+    ))
+
+    fig.update_layout(
+        xaxis_title="Baseline Loan-Level PD (%)",
+        yaxis_title="Stressed Loan-Level PD (%)",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    )
+    return _apply_theme(fig, "Non-Linear S-Curve Transmission: d(PD)/dz = PD(1 − PD)")
 
 
 # ── Helper ────────────────────────────────────────────────────
@@ -220,3 +273,4 @@ def _hex_to_rgb(hex_color: str) -> tuple[float, float, float]:
 
 # Aliases kept for backward compat
 create_roc_curves_chart = create_roc_curve_chart
+
