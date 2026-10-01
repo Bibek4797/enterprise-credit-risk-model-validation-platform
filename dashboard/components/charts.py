@@ -119,11 +119,36 @@ def create_roc_curve_chart(
 # ── Vintage Curve ──────────────────────────────────────────────
 def create_vintage_chart(vintage_df: pd.DataFrame) -> go.Figure:
     """Origination Vintage Default Rate Trend chart."""
-    x_col = "vintage_year" if "vintage_year" in vintage_df.columns else vintage_df.columns[0]
-    y_col = "observed_default_rate" if "observed_default_rate" in vintage_df.columns else vintage_df.columns[1]
+    df_plot = vintage_df.copy()
+
+    # If raw loan-level data was passed, aggregate using build_vintage_summary
+    if "observed_default_rate" not in df_plot.columns:
+        try:
+            from portfolio.vintage import build_vintage_summary
+            df_plot = build_vintage_summary(df_plot)
+        except Exception:
+            # Fallback inline aggregation if issue_d and target exist
+            if "issue_d" in df_plot.columns and "target" in df_plot.columns:
+                df_plot["issue_dt"] = pd.to_datetime(df_plot["issue_d"], format="%b-%Y", errors="coerce")
+                df_plot["vintage_year"] = df_plot["issue_dt"].dt.year
+                df_plot = (
+                    df_plot.dropna(subset=["vintage_year"])
+                    .groupby("vintage_year")
+                    .agg(total=("target", "count"), defaults=("target", "sum"))
+                    .reset_index()
+                )
+                df_plot["observed_default_rate"] = (df_plot["defaults"] / df_plot["total"] * 100.0).round(2)
+
+    if "vintage_year" in df_plot.columns and "observed_default_rate" in df_plot.columns:
+        df_plot = df_plot.dropna(subset=["vintage_year"]).sort_values("vintage_year")
+        x_col = "vintage_year"
+        y_col = "observed_default_rate"
+    else:
+        x_col = df_plot.columns[0]
+        y_col = df_plot.columns[1] if len(df_plot.columns) > 1 else df_plot.columns[0]
 
     fig = px.line(
-        vintage_df, x=x_col, y=y_col, markers=True,
+        df_plot, x=x_col, y=y_col, markers=True,
         labels={x_col: "Origination Vintage", y_col: "Observed Default Rate (%)"},
         color_discrete_sequence=[PRIMARY_BLUE],
     )
