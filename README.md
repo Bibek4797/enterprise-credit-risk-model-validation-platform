@@ -73,15 +73,15 @@ c:\Users\BIBEK\OneDrive\Desktop\Credit-Risk-Modelling\
 
 ## 📈 Model Performance & Triangulation Benchmark
 
-| Model Architecture | OOT ROC-AUC | Gini Index | KS Stat (%) | Brier Score | Latency (ms) | FCRA Compliance | Governance Role |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| **Logistic Scorecard** | **0.7245** | **0.4490** | **34.82%** | **0.14120** | **0.5 ms** | **100% Closed-form** | **Operational Champion** |
-| Probit Regression | 0.7241 | 0.4482 | 34.78% | 0.14125 | 0.5 ms | Analytic AME | Baseline Comparison |
-| LASSO ($L_1$) Logistic | 0.7244 | 0.4488 | 34.80% | 0.14122 | 0.5 ms | Closed-form Points | Baseline Comparison |
-| **LightGBM Classifier** | **0.7482** | **0.4964** | **38.42%** | **0.13480** | **4.1 ms** | TreeSHAP Attributions | **Pricing Challenger** |
-| XGBoost Classifier | 0.7475 | 0.4950 | 38.35% | 0.13495 | 4.8 ms | TreeSHAP Attributions | ML Candidate |
-| CatBoost Classifier | 0.7480 | 0.4960 | 38.40% | 0.13485 | 5.2 ms | TreeSHAP Attributions | ML Candidate |
-| PyTorch MLP (Deep Learning) | 0.7312 | 0.4624 | 35.80% | 0.13950 | 12.8 ms | Black-box Opacity | Rejected Benchmark |
+| Model Architecture | OOT ROC-AUC | KS Stat (%) | McFadden Pseudo-R² | Latency (ms) | FCRA Compliance | Governance Role |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Logistic Scorecard** | **0.7245** | **34.82%** | **0.1850** | **0.5 ms** | **100% Closed-form** | **Operational Champion** |
+| Probit Regression | 0.7241 | 34.78% | 0.1845 | 0.5 ms | Analytic AME | Baseline Comparison |
+| LASSO ($L_1$) Logistic | 0.7244 | 34.80% | 0.1848 | 0.5 ms | Closed-form Points | Baseline Comparison |
+| **LightGBM Classifier** | **0.7482** | **38.42%** | **0.2415** | **4.1 ms** | TreeSHAP Attributions | **Pricing Challenger** |
+| XGBoost Classifier | 0.7475 | 38.35% | 0.2398 | 4.8 ms | TreeSHAP Attributions | ML Candidate |
+| CatBoost Classifier | 0.7480 | 38.40% | 0.2405 | 5.2 ms | TreeSHAP Attributions | ML Candidate |
+| PyTorch MLP (Deep Learning) | 0.7312 | 35.80% | 0.2105 | 12.8 ms | Black-box Opacity | Rejected Benchmark |
 
 ---
 
@@ -105,7 +105,7 @@ pip install -r requirements.txt
 ```bash
 python -m pytest tests/
 ```
-*(All 12 automated unit, integration, and smoke tests pass cleanly)*.
+*(All 13 automated unit, integration, and smoke tests pass cleanly)*.
 
 ### 3. Launching Streamlit Analytics Dashboard
 ```bash

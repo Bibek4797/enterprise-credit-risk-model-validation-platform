@@ -20,8 +20,12 @@ def run_bootstrap_validation(
     n_bootstraps: int = 500,
     ci_level: float = 0.95,
     random_state: int = 42,
+    n_iterations: int | None = None,
 ) -> pd.DataFrame:
     """Calculate non-parametric bootstrap confidence intervals for key performance metrics."""
+    if n_iterations is not None:
+        n_bootstraps = n_iterations
+
     np.random.seed(random_state)
     y_true_arr = np.asarray(y_true, dtype=int)
     y_prob_arr = np.asarray(y_prob, dtype=float)

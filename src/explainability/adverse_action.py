@@ -55,18 +55,25 @@ def build_scorecard_points_table(
         Factor = PDO / ln(2)
         Offset = TargetScore - Factor * ln(TargetOdds)
     """
+    # Robustly handle argument ordering if passed positionally
+    if isinstance(beta_0, dict) and not isinstance(beta_dict, dict):
+        beta_0, beta_dict = beta_dict, beta_0
+
+    beta_0_val = float(beta_0) if not isinstance(beta_0, dict) else 0.0
+    beta_dict_map = beta_dict if isinstance(beta_dict, dict) else {}
+
     m = max(len(woe_maps), 1)
     factor = pdo / np.log(2.0)
     offset = target_score - (factor * np.log(target_odds))
-    base_per_feature = (offset / m) - (factor * (beta_0 / m))
+    base_per_feature = (offset / m) - (factor * (beta_0_val / m))
 
     rows = []
     for feat, mapping in woe_maps.items():
         clean_feat = feat.replace("_woe", "")
         # Robustly match beta coefficient
-        beta_j = beta_dict.get(
+        beta_j = beta_dict_map.get(
             f"{clean_feat}_woe",
-            beta_dict.get(clean_feat, beta_dict.get(feat, 0.0)),
+            beta_dict_map.get(clean_feat, beta_dict_map.get(feat, 0.0)),
         )
         for bin_name, woe_val in mapping.items():
             pts = base_per_feature - (factor * beta_j * float(woe_val))
@@ -113,12 +120,22 @@ def find_bin_for_value(val: object, woe_mapping: dict[str, float]) -> str:
 def evaluate_borrower_scorecard_fcra(
     borrower_row: pd.Series,
     scorecard_df: pd.DataFrame,
-    woe_maps: dict[str, dict[str, float]],
+    woe_maps: dict[str, dict[str, float]] | None = None,
     approval_threshold: int = 600,
     top_n: int = 4,
+    cutoff_score: int | None = None,
 ) -> dict[str, object]:
     """Evaluate individual borrower across scorecard bins and extract Top 4 FCRA Adverse Action reasons."""
-    features = list(woe_maps.keys())
+    if cutoff_score is not None:
+        approval_threshold = cutoff_score
+
+    if woe_maps is None:
+        # Infer feature names from scorecard_df
+        features = list(scorecard_df["feature"].unique())
+        woe_maps = {f: {} for f in features}
+    else:
+        features = list(woe_maps.keys())
+
     breakdown_records = []
     total_score = 0
 

@@ -79,11 +79,10 @@ st.markdown(
 ccar_res = run_ccar_macro_stress_test(models["predict_scorecard"], df, feature_cols, lgd=0.95)
 summary_df = ccar_res["summary_table"]
 
-label("Federal Reserve 9-Quarter Macroeconomic Stress Scenarios & Capital Adequacy (CET1)")
+label("Federal Reserve 9-Quarter Macroeconomic Stress Scenarios & Expected Loss Expansion")
 display_tbl = summary_df[[
     "scenario_name", "delta_ur", "gdp_growth", "macro_target_dr_pct",
     "delta_beta_0", "mean_predicted_pd", "expected_loss_el", "delta_expected_loss",
-    "stressed_cet1_ratio_pct", "ccar_status"
 ]].rename(columns={
     "scenario_name": "Federal Reserve Scenario Path",
     "delta_ur": "Δ Unemployment Rate (%)",
@@ -93,8 +92,6 @@ display_tbl = summary_df[[
     "mean_predicted_pd": "Portfolio Stressed PD (%)",
     "expected_loss_el": "Stressed Expected Loss ($)",
     "delta_expected_loss": "Δ Expected Loss ($)",
-    "stressed_cet1_ratio_pct": "Stressed CET1 Ratio (%)",
-    "ccar_status": "CCAR Capital Decision (≥ 4.5%)",
 })
 
 # Format numeric columns for presentation
@@ -105,7 +102,6 @@ display_tbl["Calibrated Intercept Shift (Δβ₀)"] = display_tbl["Calibrated In
 display_tbl["Portfolio Stressed PD (%)"] = display_tbl["Portfolio Stressed PD (%)"].apply(lambda v: f"{v:.2f}%")
 display_tbl["Stressed Expected Loss ($)"] = display_tbl["Stressed Expected Loss ($)"].apply(lambda v: f"${v/1e6:,.2f}M")
 display_tbl["Δ Expected Loss ($)"] = display_tbl["Δ Expected Loss ($)"].apply(lambda v: f"+${v/1e6:,.2f}M" if v > 0 else "$0.00")
-display_tbl["Stressed CET1 Ratio (%)"] = display_tbl["Stressed CET1 Ratio (%)"].apply(lambda v: f"{v:.2f}%")
 
 render_styled_table(display_tbl)
 
@@ -131,7 +127,7 @@ section_divider()
 
 # ── Interactive Custom Macroeconomic Shock Simulator ───────────
 label("Interactive Custom Macroeconomic Shock Simulator (Dodd-Frank CCAR)")
-st.caption("Adjust hypothetical macroeconomic paths to simulate the satellite forecast, intercept shift, and CET1 capital ratio:")
+st.caption("Adjust hypothetical macroeconomic paths to simulate the satellite forecast, intercept shift, and portfolio expected loss expansion:")
 
 c_ur, c_gdp = st.columns(2)
 with c_ur:
@@ -144,8 +140,6 @@ base_pds = ccar_res["base_pds"]
 base_mean_pd = ccar_res["base_mean_pd"]
 total_exp = ccar_res["total_exposure"]
 base_el = ccar_res["base_el"]
-stressed_rwa = ccar_res["stressed_rwa"]
-current_cet1 = ccar_res["current_cet1_capital"]
 
 sim_macro_target = forecast_macro_default_rate(sim_delta_ur, sim_gdp, satellite_model)
 # Scale target relative to baseline
@@ -158,17 +152,10 @@ sim_stressed_mean_pd = float(np.mean(sim_stressed_pds))
 sim_stressed_el = total_exp * sim_stressed_mean_pd * 0.95
 sim_delta_el = sim_stressed_el - base_el
 
-sim_stressed_cet1 = current_cet1 - sim_delta_el
-sim_cet1_ratio = (sim_stressed_cet1 / stressed_rwa) * 100.0
-is_ccar_pass = sim_cet1_ratio >= 4.5
-
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3 = st.columns(3)
 with k1:
     render_kpi_card("Calibrated Intercept Shift (Δβ₀)", f"{sim_delta_b0:+.4f}", icon="📐")
 with k2:
     render_kpi_card("Stressed Mean PD", f"{sim_stressed_mean_pd:.2%}", icon="📊", is_positive_good=False)
 with k3:
     render_kpi_card("Δ Expected Loss ($)", f"+${sim_delta_el / 1e6:,.2f}M", icon="🔥", is_positive_good=False)
-with k4:
-    decision_badge = "PASS" if is_ccar_pass else "FAIL"
-    render_kpi_card("Stressed CET1 Ratio", f"{sim_cet1_ratio:.2f}% ({decision_badge})", icon="🏛️", is_positive_good=is_ccar_pass)
