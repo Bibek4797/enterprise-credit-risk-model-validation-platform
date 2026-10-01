@@ -158,6 +158,35 @@ def transform_to_woe(
     """Transform dataframe feature columns into their calculated WoE numeric values."""
     res_df = df.copy()
     for feat, mapping in woe_maps.items():
-        if feat in res_df.columns:
-            res_df[f"{feat}_woe"] = res_df[feat].astype(str).map(mapping).fillna(0.0)
+        if feat not in res_df.columns:
+            continue
+        series = res_df[feat]
+        is_interval = any(
+            isinstance(k, str) and (k.startswith("(") or k.startswith("[")) and "," in k
+            for k in mapping.keys()
+        )
+        if is_interval and pd.api.types.is_numeric_dtype(series):
+            bins = []
+            for k, woe_val in mapping.items():
+                if k == "Missing":
+                    continue
+                try:
+                    parts = k[1:-1].split(",")
+                    bins.append((float(parts[0].strip()), float(parts[1].strip()), float(woe_val)))
+                except Exception:
+                    pass
+            bins.sort(key=lambda x: x[0])
+            woe_col = pd.Series(np.nan, index=series.index)
+            for i, (left, right, woe_val) in enumerate(bins):
+                if i == 0:
+                    cond = series <= right
+                elif i == len(bins) - 1:
+                    cond = series > left
+                else:
+                    cond = (series > left) & (series <= right)
+                woe_col.loc[cond] = woe_val
+            missing_val = mapping.get("Missing", 0.0)
+            res_df[f"{feat}_woe"] = woe_col.fillna(missing_val)
+        else:
+            res_df[f"{feat}_woe"] = series.astype(str).map(mapping).fillna(0.0)
     return res_df
