@@ -67,7 +67,7 @@ def calculate_descriptive_stats(df: pd.DataFrame, columns: list[str]) -> pd.Data
 def run_normality_tests(
     df: pd.DataFrame, columns: list[str], sample_size: int = 5000, random_state: int = 42
 ) -> pd.DataFrame:
-    """Perform Shapiro-Wilk, Jarque-Bera, Anderson-Darling, and D'Agostino K2 tests."""
+    """Perform Shapiro-Wilk and Jarque-Bera normality tests."""
     results = []
     np.random.seed(random_state)
 
@@ -85,16 +85,7 @@ def run_normality_tests(
         # Jarque-Bera (full series)
         jb_stat, jb_p = stats.jarque_bera(series)
 
-        # D'Agostino K2 (full or max 50,000)
-        dag_series = series.sample(n=min(len(series), 50000), random_state=random_state)
-        dag_stat, dag_p = stats.normaltest(dag_series)
-
-        # Anderson-Darling
-        ad_res = stats.anderson(sample_series, dist="norm")
-        ad_stat = ad_res.statistic
-        ad_crit_5pct = ad_res.critical_values[2]  # 5% significance level
-
-        is_normal = (sw_p > 0.05) and (jb_p > 0.05) and (dag_p > 0.05)
+        is_normal = (sw_p > 0.05) and (jb_p > 0.05)
 
         results.append({
             "feature": col,
@@ -102,10 +93,6 @@ def run_normality_tests(
             "shapiro_pvalue": float(sw_p),
             "jarque_bera_stat": round(float(jb_stat), 2),
             "jarque_bera_pvalue": float(jb_p),
-            "dagostino_stat": round(float(dag_stat), 2),
-            "dagostino_pvalue": float(dag_p),
-            "anderson_stat": round(float(ad_stat), 4),
-            "anderson_crit_5pct": round(float(ad_crit_5pct), 4),
             "normality_holds_5pct": "Yes" if is_normal else "No",
         })
 

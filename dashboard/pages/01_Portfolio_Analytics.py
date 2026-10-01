@@ -28,7 +28,7 @@ except ImportError:
     from dashboard.components.charts import create_vintage_chart, create_grade_distribution_chart
     from dashboard.components.tables import render_styled_table
 
-from portfolio.segmentation import compute_geographic_concentration, analyze_recoveries
+from portfolio.segmentation import analyze_recoveries
 
 st.set_page_config(page_title="Portfolio Analytics | Credit Risk Platform", page_icon="📈", layout="wide")
 
@@ -49,8 +49,8 @@ with c2:
     exp_m = df["loan_amnt"].sum() / 1e6 if "loan_amnt" in df.columns else 0.0
     render_kpi_card("Filtered Exposure", f"${exp_m:,.1f}M", icon="💰")
 with c3:
-    conc_res = compute_geographic_concentration(df)
-    render_kpi_card("State HHI Index", f"{conc_res['hhi_index']:.1f}", icon="🗺️")
+    mean_pd = float(df["target"].mean() * 100.0) if "target" in df.columns else 20.0
+    render_kpi_card("Observed Default Rate", f"{mean_pd:.2f}%", icon="⚠️")
 with c4:
     rec_res = analyze_recoveries(df)
     avg_rec = rec_res.get("avg_recovery_amount", 0.0)
@@ -70,21 +70,3 @@ with col_grade:
     label("Portfolio Exposure ($M) by Risk Grade")
     fig_grade = create_grade_distribution_chart(df)
     st.plotly_chart(fig_grade, use_container_width=True)
-
-section_divider()
-
-# ── Geographic Table ──────────────────────────────────────────
-label("Top 15 States — Geographic Exposure Breakdown")
-state_summary = (
-    df.groupby("addr_state", observed=False)
-    .agg(
-        Loans=("addr_state", "count"),
-        Exposure_M=("loan_amnt", lambda x: round(x.sum() / 1e6, 2)),
-        Default_Rate_Pct=("target", lambda x: round(x.mean() * 100, 2)),
-    )
-    .sort_values("Exposure_M", ascending=False)
-    .reset_index()
-    .rename(columns={"addr_state": "State", "Exposure_M": "Exposure ($M)", "Default_Rate_Pct": "Default Rate (%)"})
-    .head(15)
-)
-render_styled_table(state_summary)
