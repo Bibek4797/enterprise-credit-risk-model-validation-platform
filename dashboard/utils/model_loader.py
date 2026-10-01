@@ -16,7 +16,7 @@ from features.woe_iv import calculate_woe_iv, transform_to_woe
 
 
 @st.cache_resource(ttl=7200)
-def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
+def load_trained_models(df: pd.DataFrame, model_version: str = "v3_woe_recalibrated") -> dict[str, object]:
     """Fit and cache Champion Statistical & Machine Learning models for interactive inference."""
     features_to_bin = ["int_rate", "annual_inc", "dti", "fico_range_low", "revol_util", "inq_last_6mths"]
 
@@ -33,7 +33,7 @@ def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
     # Fit Champion Logistic Scorecard
     is_sklearn_fallback = False
     try:
-        logit_model = fit_logistic_regression(df_woe[woe_cols], df_woe["target"])
+        logit_model = fit_logistic_regression(df_woe[woe_cols].fillna(0), df_woe["target"])
     except Exception:
         is_sklearn_fallback = True
         from sklearn.linear_model import LogisticRegression

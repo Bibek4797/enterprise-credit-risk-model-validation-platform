@@ -29,6 +29,6 @@ def load_credit_data(sample_size: int | None = 30000) -> pd.DataFrame:
 
 
 @st.cache_resource(ttl=7200)
-def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
+def load_trained_models(df: pd.DataFrame, model_version: str = "v3_woe_recalibrated") -> dict[str, object]:
     """Cached model loader for Scorecard and LightGBM models."""
-    return _load_trained_models(df)
+    return _load_trained_models(df, model_version=model_version)

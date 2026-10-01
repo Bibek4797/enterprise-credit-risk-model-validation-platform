@@ -5,7 +5,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 import shap
 
@@ -75,9 +74,8 @@ scorecard_df = build_scorecard_points_table(
 )
 
 # ── Model Engine Selector ──────────────────────────────────────
-st.markdown("### 🎛️ Select Model Explainability Architecture")
 model_engine = st.radio(
-    "Choose between the Regulatory Additive Scorecard or Gradient Boosted TreeSHAP:",
+    "Select Model Explainability Architecture:",
     [
         "Champion Scorecard (Logistic Regression — Additive Bin Points)",
         "Challenger LightGBM (TreeSHAP Feature Attribution)",
@@ -92,16 +90,13 @@ section_divider()
 # ==============================================================================
 if model_engine.startswith("Champion"):
     tab_inspect, tab_borrower = st.tabs([
-        "📊  Scorecard Points Matrix & Bin Inspector",
+        "📊  Scorecard Bin Points Inspector",
         "👤  Individual Borrower Underwriting & FCRA Adverse Action",
     ])
 
     with tab_inspect:
-        label("Interactive Scorecard Bin Points Inspector (Siddiqi Scorecard Scaling)")
-        st.caption(
-            "Points formula: Points_{j,k} = [ (Offset / m - Factor * beta_0 / m) - (Factor * beta_j * WoE_{j,k}) ]  "
-            "|  PDO = 20 pts  |  Target Score = 600 pts @ 50:1 Odds"
-        )
+        label("Scorecard Bin Points Inspector")
+        st.caption("Select a risk feature and bin to view its assigned score and maximum attainable score:")
 
         c_feat, c_bin = st.columns(2)
         with c_feat:
@@ -111,41 +106,22 @@ if model_engine.startswith("Champion"):
             sel_bin = st.selectbox("Select Bin Range", feat_sub["bin"].tolist())
 
         bin_row = feat_sub[feat_sub["bin"] == sel_bin].iloc[0]
+        bin_score = int(bin_row["score_points"])
         max_pts_feat = int(feat_sub["score_points"].max())
-        pts_deficit = max_pts_feat - int(bin_row["score_points"])
 
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2 = st.columns(2)
         with c1:
-            render_kpi_card("Selected Bin Points", f"{int(bin_row['score_points'])} pts", icon="🎯")
+            render_kpi_card("Selected Bin Score", f"{bin_score} pts", icon="🎯")
         with c2:
-            render_kpi_card("Bin WoE Value", f"{bin_row['woe']:+.4f}", icon="📐")
-        with c3:
-            render_kpi_card("Max Possible Feature Points", f"{max_pts_feat} pts", icon="⭐")
-        with c4:
-            render_kpi_card("Points Deficit from Max", f"-{pts_deficit} pts", icon="📉", is_positive_good=(pts_deficit == 0))
-
-        st.markdown(f"#### Score Distribution across Bins for `{sel_feat}`")
-        fig_feat = px.bar(
-            feat_sub,
-            x="bin",
-            y="score_points",
-            labels={"bin": "Risk Bin Range", "score_points": "Scorecard Points"},
-            color="score_points",
-            color_continuous_scale=[[0, "#ef4444"], [0.5, "#f59e0b"], [1.0, "#10b981"]],
-        )
-        fig_feat.update_layout(coloraxis_showscale=False)
-        st.plotly_chart(fig_feat, use_container_width=True)
-
-        with st.expander("📋 View Complete Credit Risk Scorecard Points Table (All Bins)"):
-            render_styled_table(scorecard_df)
+            render_kpi_card("Maximum Score for Feature", f"{max_pts_feat} pts", icon="⭐")
 
     with tab_borrower:
-        label("Individual Borrower Underwriting Evaluation & FCRA Audit")
+        label("Individual Borrower Underwriting & FCRA Adverse Action")
         borrower_idx = st.number_input(
             "Select Borrower Index for Individual Evaluation",
             min_value=0,
             max_value=len(df) - 1,
-            value=42,
+            value=0,
             step=1,
         )
 
@@ -157,75 +133,57 @@ if model_engine.startswith("Champion"):
             approval_threshold=600,
             top_n=4,
         )
-        sc_pd = float(models["predict_scorecard"](df.iloc[[borrower_idx]])[0])
         total_score = fcra_res["total_score"]
         is_approved = fcra_res["is_approved"]
 
-        cb1, cb2, cb3, cb4 = st.columns(4)
-        with cb1:
-            render_kpi_card("Total Credit Score", f"{total_score} pts", icon="💳")
-        with cb2:
-            status_text = "APPROVED" if is_approved else "REJECTED"
-            render_kpi_card("Underwriting Decision", status_text, icon="✅" if is_approved else "❌", is_positive_good=is_approved)
-        with cb3:
-            render_kpi_card("Predicted PD (Scorecard)", f"{sc_pd:.2%}", icon="📊", is_positive_good=is_approved)
-        with cb4:
-            render_kpi_card("FICO / DTI", f"{int(borrower_row.get('fico_range_low', 700))} / {borrower_row.get('dti', 15.0):.1f}%", icon="⚖️")
-
-        section_divider()
-
-        top_4_lag = fcra_res["top_4_lagging"]
-
-        if not is_approved:
-            st.error(
-                f"❌ **Loan Application REJECTED** (Score: {total_score} pts < 600-point Underwriting Cutoff). "
-                "Per the Fair Credit Reporting Act (FCRA Section 615(a)), the applicant must be provided with the "
-                "top 4 key factors that adversely affected their credit score."
-            )
-            st.markdown("### 📋 FCRA Adverse Action Notice — Top 4 Key Lagging Factors")
-            st.caption(
-                "Lagging factors are ranked by **Score Points Deficit**: [ Max Possible Feature Points - Points Earned by Applicant ]."
+        if is_approved:
+            st.success(
+                f"✅ **Loan Application ACCEPTED** — Credit Score: **{total_score} pts** "
+                f"(Meets or exceeds 600-point Underwriting Cutoff)"
             )
         else:
-            st.success(
-                f"✅ **Loan Application APPROVED** (Score: {total_score} pts ≥ 600-point Underwriting Cutoff). "
-                "Below are the top 4 opportunity areas where the borrower's score had the highest point deficits."
+            st.error(
+                f"❌ **Loan Application REJECTED** — Credit Score: **{total_score} pts** "
+                f"(Below 600-point Underwriting Cutoff)"
             )
-            st.markdown("### 📋 Underwriting Risk Attribution — Top 4 Point Deficits")
+            st.markdown("#### 📋 FCRA Adverse Action Notice — Top 4 Key Factors Behind Decline")
+            st.caption(
+                "Ranked by Points Lost: $\\text{Points Lost}_j = \\text{MaxScore}_j - \\text{ActualScore}_{i, j}$"
+            )
 
-        # Horizontal Bar Chart of Points Deficit
-        fig_lag = px.bar(
-            top_4_lag,
-            x="points_lag",
-            y="description",
-            orientation="h",
-            labels={"points_lag": "Score Points Deficit (Lag from Maximum Bin)", "description": "FCRA Adverse Reason"},
-            color="points_lag",
-            color_continuous_scale=[[0, "#f59e0b"], [1, "#ef4444"]],
-        )
-        fig_lag.update_layout(yaxis=dict(autorange="reversed"), coloraxis_showscale=False)
-        st.plotly_chart(fig_lag, use_container_width=True)
+            top_4_lag = fcra_res["top_4_lagging"]
 
-        display_fcra_df = top_4_lag[[
-            "reason_code", "feature", "raw_value", "assigned_bin",
-            "points_earned", "max_possible_points", "points_lag", "description"
-        ]].rename(columns={
-            "reason_code": "Reason Code",
-            "feature": "Risk Driver",
-            "raw_value": "Borrower Value",
-            "assigned_bin": "Applicant Bin",
-            "points_earned": "Score Earned",
-            "max_possible_points": "Max Possible",
-            "points_lag": "Points Deficit (Lag)",
-            "description": "FCRA Adverse Action Description",
-        })
-        render_styled_table(display_fcra_df)
+            # Clean horizontal bar chart
+            fig_lag = px.bar(
+                top_4_lag,
+                x="points_lag",
+                y="description",
+                orientation="h",
+                labels={"points_lag": "Points Lost (Deficit from Max)", "description": "FCRA Adverse Reason"},
+                color="points_lag",
+                color_continuous_scale=[[0, "#f59e0b"], [1, "#ef4444"]],
+            )
+            fig_lag.update_layout(
+                yaxis=dict(autorange="reversed"),
+                coloraxis_showscale=False,
+                height=260,
+                margin=dict(l=10, r=10, t=10, b=10),
+            )
+            st.plotly_chart(fig_lag, use_container_width=True)
 
-        with st.expander("🔍 View Complete Feature-by-Feature Scorecard Breakdown"):
-            render_styled_table(fcra_res["breakdown"][[
-                "feature", "raw_value", "assigned_bin", "points_earned",
-                "max_possible_points", "points_lag", "reason_code", "description"
-            ]])
+            display_fcra_df = top_4_lag[[
+                "reason_code", "feature", "raw_value", "points_earned",
+                "max_possible_points", "points_lag", "description"
+            ]].rename(columns={
+                "reason_code": "Reason Code",
+                "feature": "Risk Driver",
+                "raw_value": "Applicant Value",
+                "points_earned": "Actual Score",
+                "max_possible_points": "Max Score",
+                "points_lag": "Points Lost",
+                "description": "FCRA Adverse Action Description",
+            })
+            render_styled_table(display_fcra_df)
 
 # ==============================================================================
 # OPTION 2: CHALLENGER LIGHTGBM (TREESHAP)
@@ -243,86 +201,83 @@ else:
         st.plotly_chart(fig_shap, use_container_width=True)
 
     with tab_local:
-        label("Local Borrower TreeSHAP Attribution (Top 4 Lagging Risk Drivers)")
+        label("Local Individual Borrower TreeSHAP Inspector")
         borrower_idx = st.number_input(
             "Select Borrower Index for LightGBM Individual Evaluation",
             min_value=0,
             max_value=len(df) - 1,
-            value=42,
+            value=0,
             step=1,
         )
 
         borrower_row = df.iloc[borrower_idx]
         lgb_pred_pd = float(models["predict_lgb"](df.iloc[[borrower_idx]])[0])
-        is_lgb_approved = bool(lgb_pred_pd <= 0.20)
+        baseline_pd = float(np.mean(df["target"]))
+        deviation_pct = lgb_pred_pd - baseline_pd
+        cutoff = 0.20
+        is_lgb_approved = bool(lgb_pred_pd <= cutoff)
 
-        cl1, cl2, cl3, cl4 = st.columns(4)
-        with cl1:
-            render_kpi_card("Predicted PD (LightGBM)", f"{lgb_pred_pd:.2%}", icon="🤖", is_positive_good=is_lgb_approved)
-        with cl2:
-            status_text = "APPROVED" if is_lgb_approved else "REJECTED"
-            render_kpi_card("Underwriting Decision", status_text, icon="✅" if is_lgb_approved else "❌", is_positive_good=is_lgb_approved)
-        with cl3:
-            render_kpi_card("FICO Score", f"{int(borrower_row.get('fico_range_low', 700))}", icon="📊")
-        with cl4:
-            render_kpi_card("DTI Ratio", f"{borrower_row.get('dti', 15.0):.2f}%", icon="⚖️")
-
-        section_divider()
-
-        # Compute TreeSHAP values for this specific applicant
-        explainer = shap.TreeExplainer(models["lgb_dict"]["model"])
-        row_X = df[features].fillna(0).iloc[[borrower_idx]]
-        shap_out = explainer.shap_values(row_X)
-        row_shap = shap_out[1][0] if isinstance(shap_out, list) else shap_out[0]
-
-        local_records = []
-        for feat, s_val in zip(features, row_shap):
-            raw_val = borrower_row.get(feat, np.nan)
-            code, desc = REASON_CODE_MAPPING.get(feat, (f"{feat.upper()[:4]}-01", f"Risk contribution from {feat}"))
-            local_records.append({
-                "feature": feat,
-                "raw_value": raw_val,
-                "shap_value": float(s_val),
-                "reason_code": code,
-                "description": desc,
-            })
-
-        # Sort descending by SHAP value (positive SHAP pushes default probability UP / makes applicant lag)
-        local_shap_df = pd.DataFrame(local_records).sort_values("shap_value", ascending=False).reset_index(drop=True)
-        top_4_shap = local_shap_df.head(4)
-
-        if not is_lgb_approved:
-            st.error(
-                f"❌ **Loan Application REJECTED** (Predicted PD: {lgb_pred_pd:.2%} > 20.00% Underwriting Cutoff). "
-                "Below are the **Top 4 primary features where this applicant is lagging** (pushing default risk highest):"
+        if is_lgb_approved:
+            st.success(
+                f"✅ **Loan Application ACCEPTED** — Predicted PD: **{lgb_pred_pd:.2%}** "
+                f"(Cutoff: {cutoff:.2%} | Deviation from Baseline: **{deviation_pct:+.2%}**)"
             )
         else:
-            st.success(
-                f"✅ **Loan Application APPROVED** (Predicted PD: {lgb_pred_pd:.2%} ≤ 20.00% Underwriting Cutoff). "
-                "Below are the **Top 4 adverse features** that most strongly pushed the applicant's default probability upwards:"
+            st.error(
+                f"❌ **Loan Application REJECTED** — Predicted PD: **{lgb_pred_pd:.2%}** "
+                f"(Exceeds {cutoff:.2%} Cutoff | Deviation from Baseline: **{deviation_pct:+.2%}**)"
+            )
+            st.markdown("#### 📋 Local TreeSHAP Adverse Attribution — Top 4 Risk Drivers")
+            st.caption(
+                "Features causing the greatest increase in default probability (+log-odds push towards default risk):"
             )
 
-        st.markdown("### 📋 Local TreeSHAP Attribution — Top 4 Adverse Risk Contributors")
+            # Compute TreeSHAP values for this applicant
+            explainer = shap.TreeExplainer(models["lgb_dict"]["model"])
+            row_X = df[features].fillna(0).iloc[[borrower_idx]]
+            shap_out = explainer.shap_values(row_X)
+            row_shap = shap_out[1][0] if isinstance(shap_out, list) else shap_out[0]
 
-        fig_local_shap = px.bar(
-            top_4_shap,
-            x="shap_value",
-            y="description",
-            orientation="h",
-            labels={"shap_value": "SHAP Impact (+log-odds push towards default)", "description": "Top Lagging Risk Driver"},
-            color="shap_value",
-            color_continuous_scale=[[0, "#3b82f6"], [1, "#ef4444"]],
-        )
-        fig_local_shap.update_layout(yaxis=dict(autorange="reversed"), coloraxis_showscale=False)
-        st.plotly_chart(fig_local_shap, use_container_width=True)
+            local_records = []
+            for feat, s_val in zip(features, row_shap):
+                raw_val = borrower_row.get(feat, np.nan)
+                code, desc = REASON_CODE_MAPPING.get(feat, (f"{feat.upper()[:4]}-01", f"Risk contribution from {feat}"))
+                local_records.append({
+                    "feature": feat,
+                    "raw_value": raw_val,
+                    "shap_value": float(s_val),
+                    "reason_code": code,
+                    "description": desc,
+                })
 
-        display_shap_df = top_4_shap[[
-            "reason_code", "feature", "raw_value", "shap_value", "description"
-        ]].rename(columns={
-            "reason_code": "Reason Code",
-            "feature": "Risk Driver",
-            "raw_value": "Applicant Value",
-            "shap_value": "Adverse SHAP Impact (+log-odds)",
-            "description": "FCRA Adverse Action Description",
-        })
-        render_styled_table(display_shap_df)
+            # Sort descending by SHAP value (highest positive risk push)
+            local_shap_df = pd.DataFrame(local_records).sort_values("shap_value", ascending=False).reset_index(drop=True)
+            top_4_shap = local_shap_df.head(4)
+
+            fig_local_shap = px.bar(
+                top_4_shap,
+                x="shap_value",
+                y="description",
+                orientation="h",
+                labels={"shap_value": "SHAP Impact (+log-odds)", "description": "Top Lagging Risk Driver"},
+                color="shap_value",
+                color_continuous_scale=[[0, "#f59e0b"], [1, "#ef4444"]],
+            )
+            fig_local_shap.update_layout(
+                yaxis=dict(autorange="reversed"),
+                coloraxis_showscale=False,
+                height=260,
+                margin=dict(l=10, r=10, t=10, b=10),
+            )
+            st.plotly_chart(fig_local_shap, use_container_width=True)
+
+            display_shap_df = top_4_shap[[
+                "reason_code", "feature", "raw_value", "shap_value", "description"
+            ]].rename(columns={
+                "reason_code": "Reason Code",
+                "feature": "Risk Driver",
+                "raw_value": "Applicant Value",
+                "shap_value": "Adverse SHAP Impact (+log-odds)",
+                "description": "FCRA Adverse Action Description",
+            })
+            render_styled_table(display_shap_df)

@@ -73,79 +73,54 @@ lgb_mcf = lgb_m.get("mcfadden_pseudo_r2")
 if lgb_mcf is None:
     lgb_mcf = compute_mcfadden_r2_safe(y_true, lgb_preds)
 
-# ── KPI Row ───────────────────────────────────────────────────
-label("Model Performance Metrics (Discrimination, Calibration & Pseudo-R²)")
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    render_kpi_card("Champion ROC-AUC", f"{sc_auc:.4f}", icon="🏆")
-with c2:
-    render_kpi_card("Champion KS Stat", f"{sc_ks:.2f}%", icon="📊")
-with c3:
-    hl_status = "Calibrated" if sc_hl_cal else "Miscalibrated"
-    render_kpi_card("Hosmer-Lemeshow p-val", f"{sc_hl:.4f} ({hl_status})", icon="📐")
-with c4:
-    render_kpi_card("Champion McFadden R²", f"{sc_mcf:.4f}", icon="📈")
-
-c5, c6, c7, c8 = st.columns(4)
-with c5:
-    render_kpi_card("Challenger ROC-AUC", f"{lgb_auc:.4f}", icon="🤖")
-with c6:
-    render_kpi_card("Challenger KS Stat", f"{lgb_ks:.2f}%", icon="📊")
-with c7:
-    chl_status = "Calibrated" if lgb_hl_cal else "Miscalibrated"
-    render_kpi_card("Challenger H-L p-val", f"{lgb_hl:.4f} ({chl_status})", icon="📐")
-with c8:
-    render_kpi_card("Challenger McFadden R²", f"{lgb_mcf:.4f}", icon="📈")
+# ── Model Comparison Summary (Full Horizontal Width) ────────────────
+label("Model Comparison Summary (Discrimination, Calibration & Pseudo-R²)")
+comparison_df = pd.DataFrame([
+    {
+        "Model Architecture": "Champion Scorecard (Logistic Regression)",
+        "ROC-AUC": f"{sc_auc:.4f}",
+        "KS Statistic": f"{sc_ks:.2f}%",
+        "Hosmer-Lemeshow (p-value)": f"{sc_hl:.4f}",
+        "McFadden Pseudo-R²": f"{sc_mcf:.4f}",
+        "Regulatory Calibration Status": "Calibrated" if sc_hl_cal else "Miscalibrated",
+    },
+    {
+        "Model Architecture": "Challenger LightGBM (Gradient Boosted Trees)",
+        "ROC-AUC": f"{lgb_auc:.4f}",
+        "KS Statistic": f"{lgb_ks:.2f}%",
+        "Hosmer-Lemeshow (p-value)": f"{lgb_hl:.4f}",
+        "McFadden Pseudo-R²": f"{lgb_mcf:.4f}",
+        "Regulatory Calibration Status": "Calibrated" if lgb_hl_cal else "Miscalibrated",
+    },
+])
+render_styled_table(comparison_df)
 
 section_divider()
 
-# ── ROC + Comparison ──────────────────────────────────────────
-col_roc, col_table = st.columns([1.6, 1], gap="large")
+# ── ROC & Cutoff Simulator Row ─────────────────────────────────────────
+col_roc, col_cutoff = st.columns([1.2, 1.0], gap="large")
 
 with col_roc:
     label("Receiver Operating Characteristic (ROC) Curves")
     fig_roc = create_roc_curve_chart(y_true, sc_preds, lgb_preds)
     st.plotly_chart(fig_roc, use_container_width=True)
 
-with col_table:
-    label("Model Comparison Summary")
-    comparison_df = pd.DataFrame([
-        {
-            "Model": "Champion Scorecard (Logit)",
-            "ROC-AUC": f"{sc_auc:.4f}",
-            "KS (%)": f"{sc_ks:.2f}%",
-            "Hosmer-Lemeshow (p-value)": f"{sc_hl:.4f}",
-            "McFadden Pseudo-R²": f"{sc_mcf:.4f}",
-            "Calibration Status": "Calibrated" if sc_hl_cal else "Miscalibrated",
-        },
-        {
-            "Model": "Challenger LightGBM",
-            "ROC-AUC": f"{lgb_auc:.4f}",
-            "KS (%)": f"{lgb_ks:.2f}%",
-            "Hosmer-Lemeshow (p-value)": f"{lgb_hl:.4f}",
-            "McFadden Pseudo-R²": f"{lgb_mcf:.4f}",
-            "Calibration Status": "Calibrated" if lgb_hl_cal else "Miscalibrated",
-        },
-    ])
-    render_styled_table(comparison_df)
+with col_cutoff:
+    label("Interactive Decision Cutoff Threshold Simulator")
+    st.caption("Adjust the cutoff to simulate portfolio approval volume vs bad rate on test data:")
+    cutoff = st.slider(
+        "Underwriting Decision Cutoff — Probability of Default (0% to 100%)",
+        min_value=0.01, max_value=1.00, value=0.20, step=0.01,
+    )
 
-section_divider()
+    approved_mask     = lgb_preds <= cutoff
+    approval_rate     = approved_mask.mean() * 100
+    bad_rate_approved = (y_true[approved_mask].mean() * 100) if approved_mask.sum() > 0 else 0.0
 
-# ── Cutoff Simulator ──────────────────────────────────────────
-label("Interactive Decision Cutoff Threshold Simulator")
-cutoff = st.slider(
-    "Underwriting Decision Cutoff — Probability of Default (0% to 100%)",
-    min_value=0.01, max_value=1.00, value=0.20, step=0.01,
-)
+    cc1, cc2 = st.columns(2)
+    with cc1:
+        render_kpi_card("Decision Cutoff", f"{cutoff:.2%}", icon="🎚️")
+        render_kpi_card("Simulated Approval Rate", f"{approval_rate:.2f}%", icon="✅")
+    with cc2:
+        render_kpi_card("Approved Bad Rate", f"{bad_rate_approved:.2f}%", icon="❗", is_positive_good=False)
 
-approved_mask      = lgb_preds <= cutoff
-approval_rate      = approved_mask.mean() * 100
-bad_rate_approved  = (y_true[approved_mask].mean() * 100) if approved_mask.sum() > 0 else 0.0
-
-cc1, cc2, cc3 = st.columns(3)
-with cc1:
-    render_kpi_card("Decision Cutoff", f"{cutoff:.2%}", icon="🎚️")
-with cc2:
-    render_kpi_card("Simulated Approval Rate", f"{approval_rate:.2f}%", icon="✅")
-with cc3:
-    render_kpi_card("Approved Bad Rate", f"{bad_rate_approved:.2f}%", icon="❗", is_positive_good=False)
