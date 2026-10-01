@@ -233,8 +233,27 @@ else:
 
     with tab_global:
         label("Global TreeSHAP Feature Importance (Overall Model Drivers)")
-        st.caption("Calculates Mean |SHAP| values across the portfolio to evaluate macro risk drivers.")
-        fig_shap = create_shap_summary_chart(df, features)
+        st.caption("Calculates Mean |SHAP| values across the portfolio to evaluate macro risk drivers per SR 11-7.")
+        try:
+            sample_X = df[features].head(250).copy()
+            for c in sample_X.select_dtypes(include=["object"]).columns:
+                sample_X[c] = sample_X[c].astype("category")
+            explainer = shap.TreeExplainer(models["lgb_dict"]["model"])
+            vals = explainer.shap_values(sample_X)
+            if isinstance(vals, list) and len(vals) > 1:
+                shap_mat = vals[1]
+            elif hasattr(vals, "ndim") and vals.ndim == 3:
+                shap_mat = vals[:, :, 1]
+            else:
+                shap_mat = vals
+            mean_abs = np.mean(np.abs(shap_mat), axis=0)
+            ranking_df = pd.DataFrame({
+                "feature": features,
+                "mean_abs_shap": np.round(mean_abs, 4),
+            }).sort_values("mean_abs_shap", ascending=False).reset_index(drop=True)
+            fig_shap = create_shap_summary_chart(ranking_df)
+        except Exception:
+            fig_shap = create_shap_summary_chart(df, features)
         st.plotly_chart(fig_shap, use_container_width=True)
 
     with tab_local:

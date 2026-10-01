@@ -171,12 +171,17 @@ def create_shap_summary_chart(
         feat_list = (
             features
             if features
-            else [c for c in df_or_ranking.select_dtypes(include=[np.number]).columns if c != "target"][:10]
+            else [c for c in df_or_ranking.columns if c != "target"][:10]
         )
         records = []
         for f in feat_list:
             if f in df_or_ranking.columns:
-                val = float(np.std(df_or_ranking[f].dropna()))
+                s = pd.to_numeric(df_or_ranking[f], errors="coerce").dropna()
+                if len(s) > 1:
+                    val = float(np.std(s))
+                else:
+                    freqs = df_or_ranking[f].dropna().astype(str).value_counts(normalize=True).values
+                    val = float(np.std(freqs)) if len(freqs) > 1 else 0.05
                 records.append({"feature": f, "mean_abs_shap": round(val, 4)})
         top_df = pd.DataFrame(records).sort_values("mean_abs_shap", ascending=True)
 
@@ -192,6 +197,57 @@ def create_shap_summary_chart(
 
 
 create_shap_summary_bar_chart = create_shap_summary_chart
+
+
+# ── Model Monitoring (Whole Model PSI & CSI) ──────────────────
+def create_model_psi_distribution_chart(
+    base_preds: np.ndarray | pd.Series,
+    actual_preds: np.ndarray | pd.Series,
+) -> go.Figure:
+    """Overlaid distribution chart of Baseline Expected vs Current Actual Model predicted PD."""
+    fig = go.Figure()
+    fig.add_trace(go.Histogram(
+        x=base_preds,
+        name="Baseline Development Vintage (Expected)",
+        opacity=0.6,
+        nbinsx=35,
+        histnorm="probability density",
+        marker_color="#3b82f6",
+    ))
+    fig.add_trace(go.Histogram(
+        x=actual_preds,
+        name="Current Operational Vintage (Actual)",
+        opacity=0.6,
+        nbinsx=35,
+        histnorm="probability density",
+        marker_color="#10b981",
+    ))
+    fig.update_layout(
+        barmode="overlay",
+        xaxis_title="Model Predicted Probability of Default (PD)",
+        yaxis_title="Probability Density",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    )
+    return _apply_theme(fig, "Whole Model PD Distribution: Baseline Vintage vs Current Operational Period")
+
+
+def create_csi_ranking_chart(csi_df: pd.DataFrame, top_n: int = 10) -> go.Figure:
+    """Horizontal bar chart showing top features ranked by Characteristic Stability Index (CSI)."""
+    top_df = csi_df.head(top_n).sort_values("csi_value", ascending=True)
+    fig = px.bar(
+        top_df,
+        y="feature_name",
+        x="csi_value",
+        orientation="h",
+        labels={"feature_name": "Risk Driver", "csi_value": "CSI Drift Metric"},
+        color="csi_value",
+        color_continuous_scale=[[0, "#10b981"], [0.4, "#f59e0b"], [1.0, "#ef4444"]],
+    )
+    fig.add_vline(x=0.10, line_dash="dash", line_color="#f59e0b", annotation_text="Warning (0.10)")
+    fig.add_vline(x=0.25, line_dash="dash", line_color="#ef4444", annotation_text="Critical (0.25)")
+    fig.update_traces(marker_line_width=0)
+    fig.update_coloraxes(showscale=False)
+    return _apply_theme(fig, f"Top {min(top_n, len(top_df))} Features Ranked by Characteristic Stability Index (CSI)")
 
 
 # ── Stress Testing ────────────────────────────────────────────

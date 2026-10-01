@@ -38,3 +38,32 @@ def test_evaluate_retraining_triggers():
     res_red = evaluate_retraining_triggers(psi_value=0.28, current_auc=0.6500, baseline_auc=0.7285, current_ks_pct=25.0)
     assert res_red["traffic_light_status"] == "RED"
     assert res_red["is_retraining_required"] is True
+
+
+def test_calculate_feature_csi_numeric_and_categorical():
+    from monitoring.csi import build_portfolio_csi_report
+
+    # Numeric
+    exp_num = pd.Series(np.random.normal(50, 10, 500))
+    act_num = pd.Series(np.random.normal(50, 10, 500))
+    res_num = calculate_feature_csi(exp_num, act_num, "annual_inc")
+    assert res_num["feature_type"] == "Numeric"
+    assert "csi_value" in res_num
+    assert res_num["csi_value"] < 0.10
+
+    # Categorical
+    exp_cat = pd.Series(["RENT", "OWN", "MORTGAGE"] * 100)
+    act_cat = pd.Series(["RENT", "OWN", "MORTGAGE"] * 100)
+    res_cat = calculate_feature_csi(exp_cat, act_cat, "home_ownership")
+    assert res_cat["feature_type"] == "Categorical"
+    assert "csi_value" in res_cat
+    assert res_cat["csi_value"] < 0.10
+
+    # Portfolio report
+    df_exp = pd.DataFrame({"annual_inc": exp_num, "home_ownership": exp_cat})
+    df_act = pd.DataFrame({"annual_inc": act_num, "home_ownership": act_cat})
+    csi_df = build_portfolio_csi_report(df_exp, df_act, ["annual_inc", "home_ownership"])
+    assert len(csi_df) == 2
+    assert "feature_name" in csi_df.columns
+    assert "csi_value" in csi_df.columns
+
