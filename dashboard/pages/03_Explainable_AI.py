@@ -56,21 +56,41 @@ logit_dict = models["logit_dict"]
 model_res = logit_dict["model_result"]
 
 # Extract logistic regression parameters
-if hasattr(model_res, "params"):
-    beta_0 = float(model_res.params["const"])
+if "beta_0" in models and "beta_dict" in models:
+    beta_0 = float(models["beta_0"])
+    beta_dict = dict(models["beta_dict"])
+elif hasattr(model_res, "params"):
+    beta_0 = float(model_res.params["const"]) if "const" in model_res.params else float(np.log(df["target"].mean() / (1.0 - df["target"].mean() + 1e-9)))
     beta_dict = {col: float(model_res.params[col]) for col in model_res.params.index if col != "const"}
 else:
-    beta_0 = float(model_res.m.intercept_[0])
-    beta_dict = {f"{c}_woe": float(w) for c, w in zip(model_res.cols, model_res.m.coef_[0])}
+    beta_0 = float(getattr(model_res.m, "intercept_", [0.0])[0])
+    beta_dict = {col: float(coef) for col, coef in zip(model_res.cols, model_res.m.coef_[0])}
 
-# Build scorecard points table using exact Siddiqi / Basel formula
+# Guarantee dual key lookup (both "int_rate" and "int_rate_woe")
+for feat in woe_maps.keys():
+    clean_k = feat.replace("_woe", "")
+    w_k = f"{clean_k}_woe"
+    if w_k in beta_dict and clean_k not in beta_dict:
+        beta_dict[clean_k] = beta_dict[w_k]
+    elif clean_k in beta_dict and w_k not in beta_dict:
+        beta_dict[w_k] = beta_dict[clean_k]
+
+# Scorecard scaling parameters
+PDO = 20.0
+TARGET_SCORE = 600.0
+TARGET_ODDS = 50.0
+FACTOR = PDO / np.log(2.0)
+OFFSET = TARGET_SCORE - (FACTOR * np.log(TARGET_ODDS))
+NUM_FEATURES = len(woe_maps)
+
+# Build scorecard points table across all 29 features using exact Siddiqi formula
 scorecard_df = build_scorecard_points_table(
     woe_maps=woe_maps,
     beta_0=beta_0,
     beta_dict=beta_dict,
-    pdo=20.0,
-    target_score=600.0,
-    target_odds=50.0,
+    pdo=PDO,
+    target_score=TARGET_SCORE,
+    target_odds=TARGET_ODDS,
 )
 
 # ── Model Engine Selector ──────────────────────────────────────
@@ -95,12 +115,14 @@ if model_engine.startswith("Champion"):
     ])
 
     with tab_inspect:
-        label("Scorecard Bin Points Inspector")
-        st.caption("Select a risk feature and bin to view its assigned score and maximum attainable score:")
+        label("Scorecard Bin Points Inspector (All 29 Risk Features)")
+        st.caption("Select any feature and risk bin to view its assigned score and maximum attainable score:")
 
         c_feat, c_bin = st.columns(2)
         with c_feat:
-            sel_feat = st.selectbox("Select Risk Feature to Inspect", list(woe_maps.keys()))
+            # Sorted list of all 29 risk features
+            all_feats = sorted(list(woe_maps.keys()))
+            sel_feat = st.selectbox("Select Risk Feature to Inspect (29 Features Available)", all_feats)
         with c_bin:
             feat_sub = scorecard_df[scorecard_df["feature"] == sel_feat]
             sel_bin = st.selectbox("Select Bin Range", feat_sub["bin"].tolist())
@@ -114,6 +136,28 @@ if model_engine.startswith("Champion"):
             render_kpi_card("Selected Bin Score", f"{bin_score} pts", icon="🎯")
         with c2:
             render_kpi_card("Maximum Score for Feature", f"{max_pts_feat} pts", icon="⭐")
+
+        # Watermark Parameter Callout Container
+        st.markdown(
+            f"""
+            <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; padding: 14px 18px; margin-top: 24px;">
+                <div style="font-weight: 600; color: #60a5fa; font-size: 0.90rem; margin-bottom: 8px;">
+                    📐 Regulatory Scorecard Calibration Parameters (Siddiqi Basel Framework)
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
+                    <div><strong>• Points to Double Odds (PDO):</strong> {PDO:.1f} pts</div>
+                    <div><strong>• Factor:</strong> PDO / ln(2) = {FACTOR:.4f}</div>
+                    <div><strong>• Target Benchmark:</strong> {TARGET_SCORE:.0f} pts @ {TARGET_ODDS:.0f}:1 Odds</div>
+                    <div><strong>• Calibrated Offset:</strong> TargetScore − Factor × ln(TargetOdds) = {OFFSET:.3f}</div>
+                    <div><strong>• Model Risk Drivers (m):</strong> {NUM_FEATURES} Features</div>
+                </div>
+                <div style="margin-top: 8px; font-size: 0.80rem; color: #94a3b8; font-style: italic;">
+                    Score formula per bin: Points<sub>j, k</sub> = [(Offset / m − Factor × β<sub>0</sub> / m) − (Factor × β<sub>j</sub> × WoE<sub>j, k</sub>)]
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     with tab_borrower:
         label("Individual Borrower Underwriting & FCRA Adverse Action")
@@ -151,25 +195,18 @@ if model_engine.startswith("Champion"):
                 "Ranked by Points Lost: $\\text{Points Lost}_j = \\text{MaxScore}_j - \\text{ActualScore}_{i, j}$"
             )
 
-            top_4_lag = fcra_res["top_4_lagging"]
+            top_4_lag = fcra_res["top_4_lagging"].copy()
 
-            # Clean horizontal bar chart
-            fig_lag = px.bar(
-                top_4_lag,
-                x="points_lag",
-                y="description",
-                orientation="h",
-                labels={"points_lag": "Points Lost (Deficit from Max)", "description": "FCRA Adverse Reason"},
-                color="points_lag",
-                color_continuous_scale=[[0, "#f59e0b"], [1, "#ef4444"]],
-            )
-            fig_lag.update_layout(
-                yaxis=dict(autorange="reversed"),
-                coloraxis_showscale=False,
-                height=260,
-                margin=dict(l=10, r=10, t=10, b=10),
-            )
-            st.plotly_chart(fig_lag, use_container_width=True)
+            def _fmt_val(v):
+                if pd.isna(v):
+                    return "N/A"
+                try:
+                    fv = float(v)
+                    return f"{int(fv)}" if fv.is_integer() else f"{fv:.2f}"
+                except (ValueError, TypeError):
+                    return str(v)
+
+            top_4_lag["raw_value"] = top_4_lag["raw_value"].apply(_fmt_val)
 
             display_fcra_df = top_4_lag[[
                 "reason_code", "feature", "raw_value", "points_earned",
@@ -234,7 +271,10 @@ else:
 
             # Compute TreeSHAP values for this applicant
             explainer = shap.TreeExplainer(models["lgb_dict"]["model"])
-            row_X = df[features].fillna(0).iloc[[borrower_idx]]
+            row_X = df[features].copy().iloc[[borrower_idx]]
+            for col in row_X.select_dtypes(include=["object"]).columns:
+                row_X[col] = row_X[col].astype("category")
+
             shap_out = explainer.shap_values(row_X)
             row_shap = shap_out[1][0] if isinstance(shap_out, list) else shap_out[0]
 
@@ -259,7 +299,7 @@ else:
                 x="shap_value",
                 y="description",
                 orientation="h",
-                labels={"shap_value": "SHAP Impact (+log-odds)", "description": "Top Lagging Risk Driver"},
+                labels={"shap_value": "SHAP Impact (+log-odds)", "description": "Top Adverse Risk Driver"},
                 color="shap_value",
                 color_continuous_scale=[[0, "#f59e0b"], [1, "#ef4444"]],
             )
@@ -270,14 +310,3 @@ else:
                 margin=dict(l=10, r=10, t=10, b=10),
             )
             st.plotly_chart(fig_local_shap, use_container_width=True)
-
-            display_shap_df = top_4_shap[[
-                "reason_code", "feature", "raw_value", "shap_value", "description"
-            ]].rename(columns={
-                "reason_code": "Reason Code",
-                "feature": "Risk Driver",
-                "raw_value": "Applicant Value",
-                "shap_value": "Adverse SHAP Impact (+log-odds)",
-                "description": "FCRA Adverse Action Description",
-            })
-            render_styled_table(display_shap_df)

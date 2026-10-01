@@ -5,17 +5,38 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-REASON_CODE_MAPPING = {
-    "dti": ("DTI-01", "High debt-to-income ratio reduces cash flow buffer"),
-    "int_rate": ("INT-02", "High risk-based interest rate pricing tier"),
-    "revol_util": ("UTIL-03", "Elevated revolving line credit utilization"),
-    "annual_inc": ("INC-04", "Gross annual income insufficient for loan obligation"),
-    "fico_range_low": ("FICO-05", "Credit bureau score below underwriting risk cutoff"),
-    "delinq_2yrs": ("DELINQ-06", "Past history of 30+ day payment delinquencies"),
-    "inq_last_6mths": ("INQ-07", "Excessive recent credit inquiries within 6 months"),
-    "fe_fico_midpoint": ("FICO-05", "Credit score midpoint below required threshold"),
-    "loan_amnt": ("AMT-08", "Requested loan principal exceeds debt capacity"),
-    "installment": ("INST-09", "Monthly loan installment obligation too high"),
+# Comprehensive FCRA Adverse Action reason code mapping for all 29 risk features
+REASON_CODE_MAPPING: dict[str, tuple[str, str]] = {
+    "loan_amnt": ("AMT-01", "Requested loan principal exceeds debt capacity"),
+    "term": ("TERM-02", "Extended loan duration increases maturity risk exposure"),
+    "int_rate": ("INT-03", "High risk-based interest rate pricing tier"),
+    "installment": ("INST-04", "Monthly loan installment obligation too high"),
+    "emp_length": ("EMP-05", "Insufficient continuous employment duration"),
+    "home_ownership": ("HOME-06", "Higher risk residential tenure classification"),
+    "annual_inc": ("INC-07", "Gross annual income insufficient for loan obligation"),
+    "verification_status": ("VERIF-08", "Unverified or incomplete income documentation"),
+    "purpose": ("PURP-09", "Higher risk loan purpose category"),
+    "addr_state": ("GEO-10", "Regional credit exposure or state jurisdiction risk"),
+    "dti": ("DTI-11", "High debt-to-income ratio reduces cash flow buffer"),
+    "delinq_2yrs": ("DELINQ-12", "Past history of 30+ day payment delinquencies"),
+    "fico_range_low": ("FICO-13", "Credit bureau score below underwriting risk cutoff"),
+    "inq_last_6mths": ("INQ-14", "Excessive recent credit inquiries within past 6 months"),
+    "open_acc": ("ACC-15", "Suboptimal number of active open credit trade lines"),
+    "pub_rec": ("PUB-16", "Derogatory public records present on credit report"),
+    "revol_bal": ("BAL-17", "High outstanding revolving debt balance"),
+    "revol_util": ("UTIL-18", "Elevated revolving line credit utilization"),
+    "total_acc": ("TOTAL-19", "Limited overall credit account history depth"),
+    "mort_acc": ("MORT-20", "Insufficient or elevated mortgage account leverage"),
+    "pub_rec_bankruptcies": ("BANKR-21", "Prior bankruptcy record on credit file"),
+    "tax_liens": ("LIEN-22", "Unsatisfied government tax liens recorded"),
+    "tot_hi_cred_lim": ("LIM-23", "Low total aggregate credit limit ceiling"),
+    "total_bc_limit": ("BCLIM-24", "Insufficient available bankcard credit line limit"),
+    "fe_loan_to_income_ratio": ("LTI-25", "Loan amount to annual income ratio too high"),
+    "fe_monthly_installment_to_income_ratio": ("BURDEN-26", "Monthly debt payment burden exceeds safe threshold"),
+    "fe_interest_burden_ratio": ("INTBUR-27", "Total interest burden excessive relative to income"),
+    "fe_available_revolving_credit": ("AVAIL-28", "Low available revolving credit headroom"),
+    "fe_credit_history_months": ("HIST-29", "Insufficient credit file history age / maturity"),
+    "fe_fico_midpoint": ("FICO-13", "Credit bureau score below underwriting risk cutoff"),
 }
 
 
@@ -30,6 +51,9 @@ def build_scorecard_points_table(
     """Construct banking-grade Scorecard points table using exact Siddiqi formula per bin.
 
     Points_{j,k} = [ (Offset/m - Factor * beta_0/m) - (Factor * beta_j * WoE_{j,k}) ]
+    Where:
+        Factor = PDO / ln(2)
+        Offset = TargetScore - Factor * ln(TargetOdds)
     """
     m = max(len(woe_maps), 1)
     factor = pdo / np.log(2.0)
@@ -38,11 +62,16 @@ def build_scorecard_points_table(
 
     rows = []
     for feat, mapping in woe_maps.items():
-        beta_j = beta_dict.get(f"{feat}_woe", beta_dict.get(feat, 0.0))
+        clean_feat = feat.replace("_woe", "")
+        # Robustly match beta coefficient
+        beta_j = beta_dict.get(
+            f"{clean_feat}_woe",
+            beta_dict.get(clean_feat, beta_dict.get(feat, 0.0)),
+        )
         for bin_name, woe_val in mapping.items():
             pts = base_per_feature - (factor * beta_j * float(woe_val))
             rows.append({
-                "feature": feat,
+                "feature": clean_feat,
                 "bin": str(bin_name),
                 "woe": round(float(woe_val), 4),
                 "score_points": int(round(pts)),
@@ -51,23 +80,33 @@ def build_scorecard_points_table(
     return pd.DataFrame(rows)
 
 
-def find_bin_for_value(val: float, woe_mapping: dict[str, float]) -> str:
-    """Find corresponding bin string for an empirical continuous value."""
+def find_bin_for_value(val: object, woe_mapping: dict[str, float]) -> str:
+    """Find corresponding bin string for an empirical continuous value or categorical string."""
     if pd.isna(val):
         return "Missing" if "Missing" in woe_mapping else list(woe_mapping.keys())[0]
 
+    # Exact match for categorical string values
+    val_str = str(val).strip()
     for k in woe_mapping.keys():
-        if k == "Missing":
-            continue
-        try:
-            parts = k[1:-1].split(",")
-            left, right = float(parts[0].strip()), float(parts[1].strip())
-            if left < float(val) <= right:
-                return k
-        except Exception:
-            pass
+        if k.strip().lower() == val_str.lower():
+            return k
 
-    # Fallback to extreme ends or first
+    # Interval parsing for continuous numeric variables: '(left, right]' or '[left, right]'
+    try:
+        fval = float(val)
+        for k in woe_mapping.keys():
+            if k == "Missing":
+                continue
+            if (k.startswith("(") or k.startswith("[")) and (k.endswith(")") or k.endswith("]")):
+                parts = k[1:-1].split(",")
+                if len(parts) == 2:
+                    left, right = float(parts[0].strip()), float(parts[1].strip())
+                    if left < fval <= right:
+                        return k
+    except Exception:
+        pass
+
+    # Fallback to first bin if no match
     return list(woe_mapping.keys())[0]
 
 
@@ -84,11 +123,14 @@ def evaluate_borrower_scorecard_fcra(
     total_score = 0
 
     for feat in features:
-        sub_df = scorecard_df[scorecard_df["feature"] == feat]
+        clean_feat = feat.replace("_woe", "")
+        sub_df = scorecard_df[scorecard_df["feature"] == clean_feat]
+        if sub_df.empty:
+            sub_df = scorecard_df[scorecard_df["feature"] == feat]
         if sub_df.empty:
             continue
 
-        raw_val = borrower_row.get(feat, np.nan)
+        raw_val = borrower_row.get(clean_feat, borrower_row.get(feat, np.nan))
         assigned_bin = find_bin_for_value(raw_val, woe_maps[feat])
 
         # Match points for assigned bin
@@ -102,12 +144,15 @@ def evaluate_borrower_scorecard_fcra(
 
         max_pts = int(sub_df["score_points"].max())
         max_bin = str(sub_df.loc[sub_df["score_points"].idxmax(), "bin"])
-        points_lag = max_pts - earned_pts  # Deficit from best possible performance
+        points_lag = max_pts - earned_pts  # Points Lost = MaxScore - ActualScore
 
-        code, desc = REASON_CODE_MAPPING.get(feat, (f"{feat.upper()[:4]}-01", f"Adverse risk impact on {feat}"))
+        code, desc = REASON_CODE_MAPPING.get(
+            clean_feat,
+            REASON_CODE_MAPPING.get(feat, (f"{clean_feat.upper()[:4]}-01", f"Adverse risk impact on {clean_feat}")),
+        )
 
         breakdown_records.append({
-            "feature": feat,
+            "feature": clean_feat,
             "raw_value": raw_val,
             "assigned_bin": assigned_bin,
             "woe": earned_woe,
@@ -143,11 +188,12 @@ def generate_adverse_action_reasons(
     sorted_feats = sorted(feature_contributions.items(), key=lambda x: x[1], reverse=True)
     reasons = []
     for feat, weight in sorted_feats:
-        if feat in REASON_CODE_MAPPING:
-            code, desc = REASON_CODE_MAPPING[feat]
+        clean_feat = feat.replace("_woe", "")
+        if clean_feat in REASON_CODE_MAPPING:
+            code, desc = REASON_CODE_MAPPING[clean_feat]
             reasons.append({
                 "reason_code": code,
-                "feature": feat,
+                "feature": clean_feat,
                 "description": desc,
                 "adverse_impact_weight": f"{weight:+.4f}",
             })
@@ -156,8 +202,8 @@ def generate_adverse_action_reasons(
 
     if not reasons:
         reasons = [
-            {"reason_code": "FICO-05", "feature": "fico_range_low", "description": "Credit score below underwriting threshold", "adverse_impact_weight": "-0.4000"},
-            {"reason_code": "DTI-01", "feature": "dti", "description": "High debt-to-income ratio", "adverse_impact_weight": "+0.4500"},
+            {"reason_code": "FICO-13", "feature": "fico_range_low", "description": "Credit bureau score below underwriting cutoff", "adverse_impact_weight": "-0.4000"},
+            {"reason_code": "DTI-11", "feature": "dti", "description": "High debt-to-income ratio reduces cash flow buffer", "adverse_impact_weight": "+0.4500"},
         ]
 
     return reasons
