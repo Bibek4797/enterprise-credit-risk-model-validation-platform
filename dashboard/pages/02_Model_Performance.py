@@ -46,16 +46,24 @@ sc_m  = evaluate_binary_model(y_true, sc_preds)
 lgb_m = evaluate_binary_model(y_true, lgb_preds)
 
 # ── KPI Row ───────────────────────────────────────────────────
-label("Model Discrimination Metrics")
-c1, c2, c3, c4 = st.columns(4)
+label("Model Performance Metrics (Discrimination & Calibration)")
+c1, c2, c3 = st.columns(3)
 with c1:
     render_kpi_card("Champion ROC-AUC", f"{sc_m['roc_auc']:.4f}", icon="🏆")
 with c2:
-    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}", icon="🤖")
-with c3:
     render_kpi_card("Champion KS Stat", f"{sc_m['ks_statistic_pct']:.2f}%", icon="📊")
+with c3:
+    hl_status = "Calibrated" if sc_m['hl_is_calibrated'] else "Miscalibrated"
+    render_kpi_card("Hosmer-Lemeshow p-val", f"{sc_m['hl_p_value']:.4f} ({hl_status})", icon="📐")
+
+c4, c5, c6 = st.columns(3)
 with c4:
+    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}", icon="🤖")
+with c5:
     render_kpi_card("Challenger KS Stat", f"{lgb_m['ks_statistic_pct']:.2f}%", icon="📊")
+with c6:
+    chl_status = "Calibrated" if lgb_m['hl_is_calibrated'] else "Miscalibrated"
+    render_kpi_card("Challenger H-L p-val", f"{lgb_m['hl_p_value']:.4f} ({chl_status})", icon="📐")
 
 section_divider()
 
@@ -71,18 +79,18 @@ with col_table:
     label("Model Comparison Summary")
     comparison_df = pd.DataFrame([
         {
-            "Model": "Champion Scorecard",
+            "Model": "Champion Scorecard (Logit)",
             "ROC-AUC": f"{sc_m['roc_auc']:.4f}",
-            "Gini": f"{sc_m['gini_index']:.4f}",
             "KS (%)": f"{sc_m['ks_statistic_pct']:.2f}%",
-            "Brier": f"{sc_m['brier_score']:.5f}",
+            "Hosmer-Lemeshow (p-value)": f"{sc_m['hl_p_value']:.4f}",
+            "Calibration Status": "Calibrated" if sc_m['hl_is_calibrated'] else "Miscalibrated",
         },
         {
             "Model": "Challenger LightGBM",
             "ROC-AUC": f"{lgb_m['roc_auc']:.4f}",
-            "Gini": f"{lgb_m['gini_index']:.4f}",
             "KS (%)": f"{lgb_m['ks_statistic_pct']:.2f}%",
-            "Brier": f"{lgb_m['brier_score']:.5f}",
+            "Hosmer-Lemeshow (p-value)": f"{lgb_m['hl_p_value']:.4f}",
+            "Calibration Status": "Calibrated" if lgb_m['hl_is_calibrated'] else "Miscalibrated",
         },
     ])
     render_styled_table(comparison_df)
