@@ -29,11 +29,18 @@ except ImportError:
     from dashboard.components.charts import create_shap_summary_chart
     from dashboard.components.tables import render_styled_table
 
-from explainability.adverse_action import (
-    REASON_CODE_MAPPING,
-    build_scorecard_points_table,
-    evaluate_borrower_scorecard_fcra,
-)
+try:
+    from explainability.adverse_action import (
+        REASON_CODE_MAPPING,
+        build_scorecard_points_table,
+        evaluate_borrower_scorecard_fcra,
+    )
+except ImportError:
+    from src.explainability.adverse_action import (
+        REASON_CODE_MAPPING,
+        build_scorecard_points_table,
+        evaluate_borrower_scorecard_fcra,
+    )
 
 st.set_page_config(page_title="Explainable AI | Credit Risk Platform", page_icon="🔍", layout="wide")
 

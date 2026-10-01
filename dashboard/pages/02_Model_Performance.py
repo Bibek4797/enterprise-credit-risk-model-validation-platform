@@ -134,8 +134,8 @@ section_divider()
 # ── Cutoff Simulator ──────────────────────────────────────────
 label("Interactive Decision Cutoff Threshold Simulator")
 cutoff = st.slider(
-    "Underwriting Decision Cutoff — Probability of Default",
-    min_value=0.05, max_value=0.50, value=0.20, step=0.01,
+    "Underwriting Decision Cutoff — Probability of Default (0% to 100%)",
+    min_value=0.01, max_value=1.00, value=0.20, step=0.01,
 )
 
 approved_mask      = lgb_preds <= cutoff
