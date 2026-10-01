@@ -85,7 +85,7 @@ render_traffic_light_header(
 )
 
 # ── KPI Cards Row ─────────────────────────────────────────────────────────────
-c1, c2, c3, c4 = st.columns(4)
+c1, c2 = st.columns(2)
 with c1:
     psi_icon = "🟢" if whole_model_psi < 0.10 else ("🟡" if whole_model_psi < 0.25 else "🔴")
     render_kpi_card(
@@ -96,25 +96,6 @@ with c1:
         icon=psi_icon,
     )
 with c2:
-    base_mean_pd = float(np.mean(base_preds))
-    render_kpi_card(
-        "Baseline Mean PD",
-        f"{base_mean_pd:.2%}",
-        delta=f"{len(baseline_df):,} Dev Loans",
-        is_positive_good=True,
-        icon="📊",
-    )
-with c3:
-    act_mean_pd = float(np.mean(actual_preds))
-    pd_shift = act_mean_pd - base_mean_pd
-    render_kpi_card(
-        "Current Period Mean PD",
-        f"{act_mean_pd:.2%}",
-        delta=f"{pd_shift:+.2%} vs Baseline",
-        is_positive_good=pd_shift <= 0,
-        icon="📈",
-    )
-with c4:
     csi_icon = "🟢" if max_csi < 0.10 else ("🟡" if max_csi < 0.25 else "🔴")
     render_kpi_card(
         "Max Feature CSI",

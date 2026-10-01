@@ -62,9 +62,9 @@ st.markdown(
 )
 
 # ── Benchmark Table ───────────────────────────────────────────
-stat_m = {"roc_auc": 0.7245, "gini_index": 0.4490, "ks_statistic_pct": 34.82, "brier_score": 0.14120, "training_time": 1.2,  "latency_ms": 0.5}
-ml_m   = {"roc_auc": 0.7482, "gini_index": 0.4964, "ks_statistic_pct": 38.42, "brier_score": 0.13480, "training_time": 18.4, "latency_ms": 4.1}
-dl_m   = {"roc_auc": 0.7312, "gini_index": 0.4624, "ks_statistic_pct": 35.80, "brier_score": 0.13950, "training_time": 45.2, "latency_ms": 12.8}
+stat_m = {"roc_auc": 0.7245, "ks_statistic_pct": 34.82, "training_time": 1.2,  "latency_ms": 0.5}
+ml_m   = {"roc_auc": 0.7482, "ks_statistic_pct": 38.42, "training_time": 18.4, "latency_ms": 4.1}
+dl_m   = {"roc_auc": 0.7312, "ks_statistic_pct": 35.80, "training_time": 45.2, "latency_ms": 12.8}
 
 bench_df = build_triangulation_benchmark_table(stat_m, ml_m, dl_m)
 for col in bench_df.columns:
