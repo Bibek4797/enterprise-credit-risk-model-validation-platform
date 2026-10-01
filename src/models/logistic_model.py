@@ -1,7 +1,7 @@
 """Production-grade Logistic Regression model wrapper for enterprise credit risk scorecards.
 
-Provides full statistical inference, Odds Ratio calculation, Wald statistics,
-Likelihood Ratio tests, McFadden Pseudo R-squared, AIC, BIC, and confidence intervals.
+Provides full statistical inference, Wald statistics, McFadden Pseudo R-squared,
+AIC, BIC, and parameter confidence intervals per SR 11-7 model governance.
 """
 
 from __future__ import annotations
@@ -38,21 +38,16 @@ def fit_logistic_regression(
         "p_value": result.pvalues.values,
         "ci_lower_95": conf_int[0].values,
         "ci_upper_95": conf_int[1].values,
-        "odds_ratio": np.exp(result.params.values),
-        "or_ci_lower_95": np.exp(conf_int[0].values),
-        "or_ci_upper_95": np.exp(conf_int[1].values),
     })
 
     # Fit Diagnostics
     null_ll = result.llnull
     model_ll = result.llf
     mcfadden_r2 = 1.0 - (model_ll / null_ll)
-    llr_pvalue = result.llr_pvalue
 
     fit_metrics = {
         "log_likelihood": round(float(model_ll), 4),
         "null_log_likelihood": round(float(null_ll), 4),
-        "llr_pvalue": round(float(llr_pvalue), 6),
         "mcfadden_pseudo_r2": round(float(mcfadden_r2), 4),
         "aic": round(float(result.aic), 2),
         "bic": round(float(result.bic), 2),

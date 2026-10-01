@@ -46,8 +46,8 @@ sc_m  = evaluate_binary_model(y_true, sc_preds)
 lgb_m = evaluate_binary_model(y_true, lgb_preds)
 
 # ── KPI Row ───────────────────────────────────────────────────
-label("Model Performance Metrics (Discrimination & Calibration)")
-c1, c2, c3 = st.columns(3)
+label("Model Performance Metrics (Discrimination, Calibration & Pseudo-R²)")
+c1, c2, c3, c4 = st.columns(4)
 with c1:
     render_kpi_card("Champion ROC-AUC", f"{sc_m['roc_auc']:.4f}", icon="🏆")
 with c2:
@@ -55,15 +55,19 @@ with c2:
 with c3:
     hl_status = "Calibrated" if sc_m['hl_is_calibrated'] else "Miscalibrated"
     render_kpi_card("Hosmer-Lemeshow p-val", f"{sc_m['hl_p_value']:.4f} ({hl_status})", icon="📐")
-
-c4, c5, c6 = st.columns(3)
 with c4:
-    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}", icon="🤖")
+    render_kpi_card("Champion McFadden R²", f"{sc_m['mcfadden_pseudo_r2']:.4f}", icon="📈")
+
+c5, c6, c7, c8 = st.columns(4)
 with c5:
-    render_kpi_card("Challenger KS Stat", f"{lgb_m['ks_statistic_pct']:.2f}%", icon="📊")
+    render_kpi_card("Challenger ROC-AUC", f"{lgb_m['roc_auc']:.4f}", icon="🤖")
 with c6:
+    render_kpi_card("Challenger KS Stat", f"{lgb_m['ks_statistic_pct']:.2f}%", icon="📊")
+with c7:
     chl_status = "Calibrated" if lgb_m['hl_is_calibrated'] else "Miscalibrated"
     render_kpi_card("Challenger H-L p-val", f"{lgb_m['hl_p_value']:.4f} ({chl_status})", icon="📐")
+with c8:
+    render_kpi_card("Challenger McFadden R²", f"{lgb_m['mcfadden_pseudo_r2']:.4f}", icon="📈")
 
 section_divider()
 
@@ -83,6 +87,7 @@ with col_table:
             "ROC-AUC": f"{sc_m['roc_auc']:.4f}",
             "KS (%)": f"{sc_m['ks_statistic_pct']:.2f}%",
             "Hosmer-Lemeshow (p-value)": f"{sc_m['hl_p_value']:.4f}",
+            "McFadden Pseudo-R²": f"{sc_m['mcfadden_pseudo_r2']:.4f}",
             "Calibration Status": "Calibrated" if sc_m['hl_is_calibrated'] else "Miscalibrated",
         },
         {
@@ -90,6 +95,7 @@ with col_table:
             "ROC-AUC": f"{lgb_m['roc_auc']:.4f}",
             "KS (%)": f"{lgb_m['ks_statistic_pct']:.2f}%",
             "Hosmer-Lemeshow (p-value)": f"{lgb_m['hl_p_value']:.4f}",
+            "McFadden Pseudo-R²": f"{lgb_m['mcfadden_pseudo_r2']:.4f}",
             "Calibration Status": "Calibrated" if lgb_m['hl_is_calibrated'] else "Miscalibrated",
         },
     ])

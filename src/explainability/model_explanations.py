@@ -127,7 +127,8 @@ def triangulate_feature_importances(
     logit_clean = logit_summary_df.copy()
     logit_clean["feature"] = logit_clean["feature"].str.replace("_woe", "")
 
-    merged = pd.merge(m1, logit_clean[["feature", "odds_ratio"]], on="feature", how="left")
+    logit_val_col = "coefficient" if "coefficient" in logit_clean.columns else logit_clean.columns[1]
+    merged = pd.merge(m1, logit_clean[["feature", logit_val_col]], on="feature", how="left")
     merged = merged.fillna(0.0)
 
     # Rank columns

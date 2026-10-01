@@ -58,6 +58,16 @@ def calculate_brier_score(y_true: np.ndarray | pd.Series, y_prob: np.ndarray | p
     return float(brier_score_loss(y_true, y_prob))
 
 
+def calculate_mcfadden_r2(y_true: np.ndarray | pd.Series, y_prob: np.ndarray | pd.Series) -> float:
+    """Calculate McFadden's Pseudo-R2 from empirical log-likelihood vs null log-likelihood."""
+    y = np.asarray(y_true, dtype=float)
+    p = np.clip(np.asarray(y_prob, dtype=float), 1e-12, 1.0 - 1e-12)
+    ll_model = np.sum(y * np.log(p) + (1.0 - y) * np.log(1.0 - p))
+    p_null = np.clip(np.mean(y), 1e-12, 1.0 - 1e-12)
+    ll_null = np.sum(y * np.log(p_null) + (1.0 - y) * np.log(1.0 - p_null))
+    return float(round(1.0 - (ll_model / (ll_null + 1e-12)), 4))
+
+
 def calculate_confusion_matrix_metrics(
     y_true: np.ndarray | pd.Series,
     y_prob: np.ndarray | pd.Series,
@@ -177,6 +187,7 @@ def evaluate_all_metrics(
     brier = calculate_brier_score(y_true, y_prob)
     conf_info = calculate_confusion_matrix_metrics(y_true, y_prob, threshold=threshold)
     hl_info = hosmer_lemeshow_test(y_true, y_prob)
+    mcfadden_r2 = calculate_mcfadden_r2(y_true, y_prob)
 
     return {
         "roc_auc": round(auc, 4),
@@ -192,6 +203,7 @@ def evaluate_all_metrics(
         "hl_stat": hl_info["hl_statistic"],
         "hl_p_value": hl_info["p_value"],
         "hl_is_calibrated": hl_info["is_calibrated"],
+        "mcfadden_pseudo_r2": mcfadden_r2,
     }
 
 

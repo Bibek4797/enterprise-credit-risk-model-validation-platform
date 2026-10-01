@@ -48,7 +48,7 @@ def load_trained_models(df: pd.DataFrame) -> dict[str, object]:
                 return self.m.predict_proba(X[self.cols].fillna(0))[:, 1]
 
         sk_wrapper = SklearnWrapper(sk_model, woe_cols)
-        summary_tbl = pd.DataFrame({"feature": woe_cols, "coef": sk_model.coef_[0], "odds_ratio": np.exp(sk_model.coef_[0])})
+        summary_tbl = pd.DataFrame({"feature": woe_cols, "coefficient": sk_model.coef_[0]})
         logit_model = {"model_result": sk_wrapper, "summary_table": summary_tbl}
 
     # Fit Champion LightGBM Classifier

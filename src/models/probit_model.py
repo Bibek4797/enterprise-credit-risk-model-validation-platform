@@ -76,7 +76,7 @@ def compare_logistic_probit(
 ) -> pd.DataFrame:
     """Construct side-by-side comparison table of Logistic vs Probit coefficients and scaling ratios."""
     merged = pd.merge(
-        logit_summary[["feature", "coefficient", "odds_ratio", "p_value"]],
+        logit_summary[["feature", "coefficient", "p_value"]],
         probit_summary[["feature", "probit_coefficient", "marginal_effect_ame", "p_value"]],
         on="feature",
         suffixes=("_logit", "_probit"),
