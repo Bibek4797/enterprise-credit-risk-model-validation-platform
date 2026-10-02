@@ -41,20 +41,42 @@ raw_df = load_credit_data(sample_size=40000)
 df = render_sidebar_filters(raw_df)
 
 # ── KPI Row ───────────────────────────────────────────────────
-label("Portfolio Metrics")
+label("Portfolio Credit Exposure & Expected Loss Metrics")
+total_loans = len(df)
+total_ead = float(df["loan_amnt"].sum()) if "loan_amnt" in df.columns else float(total_loans * 15000.0)
+exp_m = total_ead / 1e6
+mean_pd_dec = float(df["target"].mean()) if "target" in df.columns else 0.20
+lgd_benchmark = 0.95
+portfolio_el = total_ead * mean_pd_dec * lgd_benchmark
+el_m = portfolio_el / 1e6
+
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    render_kpi_card("Filtered Loans", f"{len(df):,}", icon="📋")
+    render_kpi_card("Active Loans", f"{total_loans:,}", icon="📋")
 with c2:
-    exp_m = df["loan_amnt"].sum() / 1e6 if "loan_amnt" in df.columns else 0.0
-    render_kpi_card("Filtered Exposure", f"${exp_m:,.1f}M", icon="💰")
+    render_kpi_card("Total Exposure (EAD)", f"${exp_m:,.1f}M", icon="💰")
 with c3:
-    mean_pd = float(df["target"].mean() * 100.0) if "target" in df.columns else 20.0
-    render_kpi_card("Observed Default Rate", f"{mean_pd:.2f}%", icon="⚠️")
+    render_kpi_card("Observed Default Rate (PD)", f"{mean_pd_dec:.2%}", icon="⚠️", is_positive_good=False)
 with c4:
-    rec_res = analyze_recoveries(df)
-    avg_rec = rec_res.get("avg_recovery_amount", 0.0)
-    render_kpi_card("Avg Post-Default Recovery", f"${avg_rec:,.2f}", icon="🔄")
+    render_kpi_card("Expected Loss (EL)", f"${el_m:,.2f}M", delta="LGD = 95.0% Benchmark", is_positive_good=False, icon="🔥")
+
+st.markdown(
+    f"""
+    <div style="background: rgba(15, 30, 60, 0.6); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 10px; padding: 12px 18px; margin-top: 10px; margin-bottom: 20px;">
+        <span style="font-weight: 700; color: #60a5fa; font-size: 0.88rem;">🏛️ Basel III Credit Risk Decomposition:</span>
+        <span style="color: #cbd5e1; font-size: 0.86rem; margin-left: 8px;">
+            <code>Expected Loss (EL) = PD × LGD × EAD</code> = 
+            <code>{mean_pd_dec:.2%} × 95.0% × ${exp_m:,.1f}M = ${el_m:,.2f}M</code>
+        </span>
+        <div style="color: #94a3b8; font-size: 0.80rem; margin-top: 4px;">
+            • <strong>EAD (Exposure at Default):</strong> Total principal commitment outstanding across portfolio loans (&Sigma; loan_amnt).<br>
+            • <strong>PD (Probability of Default):</strong> Portfolio empirical default frequency.<br>
+            • <strong>LGD (Loss Given Default):</strong> Benchmark 95.0% economic loss severity on unsecured consumer personal loans (accounting for net post-default recoveries).
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 section_divider()
 

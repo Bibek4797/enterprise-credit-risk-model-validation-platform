@@ -68,6 +68,7 @@ st.markdown(
                     <code>logit(DR<sub>t</sub>) = {b0_sat:.3f} + ({b_ur:+.3f} × ΔUR<sub>t</sub>) + ({b_gdp:+.3f} × GDP_Growth<sub>t</sub>)</code> 
                     (R² = {r2_sat:.2f}, verifying β<sub>UR</sub> > 0 and β<sub>GDP</sub> < 0).</li>
                 <li><strong>Micro-Macro Intercept Shift (Δβ₀):</strong> Macro shocks shift systemic default log-odds universally across borrowers without distorting feature weights β<sub>j</sub> (preserving discriminatory rank ordering).</li>
+                <li><strong>Credit Risk Loss Transmission:</strong> <code>EL = PD × LGD × EAD</code> (Benchmark LGD = 0.95 and EAD = Σ loan_amnt). Stressed credit loss expansion (ΔEL) determines the exact capital reserve required to absorb downturn shocks.</li>
             </ol>
         </div>
     </div>
@@ -154,8 +155,15 @@ sim_delta_el = sim_stressed_el - base_el
 
 k1, k2, k3 = st.columns(3)
 with k1:
-    render_kpi_card("Calibrated Intercept Shift (Δβ₀)", f"{sim_delta_b0:+.4f}", icon="📐")
+    render_kpi_card("Intercept Shift (Δβ₀)", f"{sim_delta_b0:+.4f}", icon="📐")
 with k2:
     render_kpi_card("Stressed Mean PD", f"{sim_stressed_mean_pd:.2%}", icon="📊", is_positive_good=False)
 with k3:
     render_kpi_card("Δ Expected Loss ($)", f"+${sim_delta_el / 1e6:,.2f}M", icon="🔥", is_positive_good=False)
+
+st.caption(
+    f"💡 **Portfolio Expected Loss Summary (EL = PD × LGD × EAD):** "
+    f"Stressed EL = **${sim_stressed_el / 1e6:,.2f}M** "
+    f"(Baseline EL: ${base_el / 1e6:,.2f}M | Portfolio Loss Expansion: **+${sim_delta_el / 1e6:,.2f}M** | "
+    f"EAD: ${total_exp / 1e6:,.1f}M | Benchmark LGD: 95.0%)"
+)

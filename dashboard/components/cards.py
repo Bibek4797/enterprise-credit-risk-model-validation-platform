@@ -11,9 +11,26 @@ def render_kpi_card(
     is_positive_good: bool = True,
     icon: str = "",
 ) -> None:
-    """Render a glassmorphism KPI metric card."""
+    """Render a glassmorphism KPI metric card with unclipped titles."""
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stMetricLabel"],
+        div[data-testid="stMetricLabel"] *,
+        div[data-testid="stMetricLabel"] > div,
+        div[data-testid="stMetricLabel"] p {
+            white-space: normal !important;
+            text-overflow: unset !important;
+            overflow: visible !important;
+            word-break: normal !important;
+            line-height: 1.35 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     delta_color = "normal" if is_positive_good else "inverse"
-    label = f"{icon} {title}" if icon else title
+    label = f"{icon} {title}".strip() if icon else title
     st.metric(label=label, value=value, delta=delta, delta_color=delta_color)
 
 

@@ -132,11 +132,23 @@ hr {
 }
 
 [data-testid="stMetricLabel"] {
-    color: #64748b !important;
-    font-size: 0.72rem !important;
+    color: #94a3b8 !important;
+    font-size: 0.76rem !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.05em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+[data-testid="stMetricLabel"] *,
+[data-testid="stMetricLabel"] > div,
+[data-testid="stMetricLabel"] p {
+    white-space: normal !important;
+    text-overflow: unset !important;
+    overflow: visible !important;
+    word-break: normal !important;
+    line-height: 1.35 !important;
 }
 
 [data-testid="stMetricValue"] {
@@ -149,6 +161,7 @@ hr {
 [data-testid="stMetricDelta"] {
     font-size: 0.78rem !important;
     font-weight: 600 !important;
+    white-space: normal !important;
 }
 
 /* ── Plotly Chart containers ───────────────────────────────── */
