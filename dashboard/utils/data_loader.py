@@ -23,21 +23,29 @@ SELECTED_29_FEATURES: list[str] = [
 @st.cache_data(ttl=3600)
 def load_credit_data(sample_size: int = 50000) -> pd.DataFrame:
     """Load credit dataset with cached memory management across 29 risk features."""
-    root = Path.cwd()
-    data_path = root / "data" / "processed" / "accepted_2007_to_2018Q4_feature_engineered.csv.gz"
+    dash_utils_dir = Path(__file__).resolve().parent
+    repo_root = dash_utils_dir.parent.parent
+
+    sample_path = repo_root / "data" / "processed" / "lending_club_29feat_sample.csv.gz"
+    full_path = repo_root / "data" / "processed" / "accepted_2007_to_2018Q4_feature_engineered.csv.gz"
 
     cols_to_load = list(set(SELECTED_29_FEATURES + [
         "loan_status", "issue_d", "grade", "sub_grade", "recoveries",
     ]))
 
-    if data_path.is_file():
+    target_path = None
+    if sample_path.is_file():
+        target_path = sample_path
+    elif full_path.is_file():
+        target_path = full_path
+
+    if target_path is not None:
         try:
-            df = pd.read_csv(data_path, usecols=lambda c: c in cols_to_load, nrows=sample_size, low_memory=False)
+            df = pd.read_csv(target_path, usecols=lambda c: c in cols_to_load, nrows=sample_size, low_memory=False)
         except Exception:
-            df = pd.read_csv(data_path, nrows=sample_size, low_memory=False)
+            df = pd.read_csv(target_path, nrows=sample_size, low_memory=False)
     else:
-        # Demonstration Mode for Streamlit Cloud
-        st.info("💡 **Demonstration Mode**: Generating portfolio sample across 29 credit features for dashboard interactivity.")
+        # Fallback only if no data file is located
         np.random.seed(42)
         n = sample_size
 

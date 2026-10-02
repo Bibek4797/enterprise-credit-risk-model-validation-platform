@@ -71,6 +71,7 @@ logs/
 data/raw/*.csv.gz
 data/raw/*.csv
 data/processed/*.csv.gz
+!data/processed/lending_club_29feat_sample.csv.gz
 
 # CatBoost logs
 catboost_info/

@@ -120,7 +120,12 @@ with c4:
     def_rate = (df["target"].mean() * 100) if "target" in df.columns else 0.0
     render_kpi_card("Default Rate", f"{def_rate:.2f}%", icon="⚠️", is_positive_good=False)
 with c5:
-    render_kpi_card("Portfolio Health", "94 / 100", icon="🛡️")
+    lgd_benchmark = 0.95
+    p_pd = float(df["target"].mean()) if "target" in df.columns else 0.18
+    p_exp = float(df["loan_amnt"].sum()) if "loan_amnt" in df.columns else 0.0
+    el_total = p_pd * lgd_benchmark * p_exp
+    el_m = el_total / 1e6
+    render_kpi_card("Expected Loss (EL)", f"${el_m:,.1f}M", delta="LGD = 95.0%", is_positive_good=False, icon="🔥")
 
 st.markdown("<div style='margin:1.5rem 0;border-top:1px solid rgba(96,165,250,0.1);'></div>", unsafe_allow_html=True)
 
@@ -143,7 +148,7 @@ with col_summary:
         unsafe_allow_html=True,
     )
     st.markdown(
-        """
+        f"""
         <div style="
             background: linear-gradient(135deg, rgba(15,30,60,0.65) 0%, rgba(10,20,45,0.75) 100%);
             border: 1px solid rgba(96,165,250,0.14);
@@ -175,9 +180,10 @@ with col_summary:
                     <span style="font-size:0.8rem;color:#64748b;font-weight:500;">PSI</span>
                     <span style="font-size:0.8rem;color:#fbbf24;font-weight:700;">0.0412 <span style="color:#34d399;font-size:0.7rem;">● GREEN</span></span>
                 </div>
+                <div style="border-top:1px solid rgba(96,165,250,0.08);"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:0.8rem;color:#64748b;font-weight:500;">HHI (Geographic)</span>
-                    <span style="font-size:0.8rem;color:#fbbf24;font-weight:700;">584.2 <span style="color:#34d399;font-size:0.7rem;">● Unconcentrated</span></span>
+                    <span style="font-size:0.8rem;color:#64748b;font-weight:500;">Portfolio Expected Loss</span>
+                    <span style="font-size:0.8rem;color:#f87171;font-weight:700;">${el_m:,.1f}M <span style="color:#94a3b8;font-size:0.7rem;">(LGD: 95%)</span></span>
                 </div>
                 <div style="border-top:1px solid rgba(96,165,250,0.08);"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">

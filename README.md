@@ -45,13 +45,13 @@ On an annual **$1.0 Billion** consumer loan origination portfolio:
 ## 🏗️ Repository Architecture & Layout
 
 ```
-c:\Users\BIBEK\OneDrive\Desktop\Credit-Risk-Modelling\
+Credit-Risk-Modelling/
 ├── src/                          # Core Domain Logic & Production Modules
 │   ├── features/                 # WoE/IV, Correlation, RFECV & Stability
 │   ├── models/                   # Scorecard, Probit, LightGBM, PyTorch & Packaging
 │   ├── validation/               # Model Metrics, Bootstrap CIs, Fair Lending ECOA
 │   ├── explainability/           # SHAP, PDP, ICE, ALE & Counterfactuals
-│   ├── portfolio/                # Vintage Curves, Cohorts, Roll Rates & HHI
+│   ├── portfolio/                # Vintage Curves, Cohorts, Roll Rates, LGD & Expected Loss
 │   ├── stress_testing/           # Scenario Generator, Elasticity & Stress Engine
 │   ├── monitoring/               # PSI, CSI, Data Drift & Retraining Triggers
 │   ├── deep_learning/            # PyTorch MLP Architecture & Benchmark
