@@ -186,9 +186,10 @@ def evaluate_borrower_scorecard_fcra(
     is_approved = bool(total_score >= approval_threshold)
 
     # Sort by points lag descending for FCRA Adverse Action
-    # Per CFPB Reg B (12 CFR § 1002.9) & FCRA § 615: Exclude lender-assigned pricing terms (int_rate)
+    # Per CFPB Reg B (12 CFR § 1002.9), ECOA & FCRA § 615: Exclude lender pricing (int_rate) and geography (addr_state)
     # Adverse action reasons MUST be actionable borrower credit/capacity attributes
-    fcra_eligible_df = breakdown_df[~breakdown_df["feature"].isin(["int_rate"])].copy()
+    non_actionable = ["int_rate", "addr_state"]
+    fcra_eligible_df = breakdown_df[~breakdown_df["feature"].isin(non_actionable)].copy()
     lagging_df = fcra_eligible_df.sort_values("points_lag", ascending=False).reset_index(drop=True)
     top_4_lagging = lagging_df.head(top_n)
 
@@ -205,10 +206,11 @@ def generate_adverse_action_reasons(
     top_n: int = 4,
 ) -> list[dict[str, str]]:
     """Generate top N FCRA Adverse Action decline reason codes based on adverse feature weights."""
-    # Filter out lender-controlled pricing terms (int_rate)
+    # Filter out lender-controlled pricing terms (int_rate) and geographic redlining proxies (addr_state)
+    non_actionable = {"int_rate", "addr_state"}
     valid_items = [
         item for item in feature_contributions.items()
-        if item[0].replace("_woe", "") != "int_rate"
+        if item[0].replace("_woe", "") not in non_actionable
     ]
     sorted_feats = sorted(valid_items, key=lambda x: x[1], reverse=True)
     reasons = []

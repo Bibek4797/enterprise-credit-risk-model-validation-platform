@@ -310,9 +310,9 @@ else:
                 })
 
             # Sort descending by SHAP value (highest positive risk push)
-            # Exclude lender-controlled pricing terms (int_rate) per CFPB Reg B / FCRA actionability mandates
+            # Exclude lender-controlled pricing terms (int_rate) & geography (addr_state) per CFPB Reg B / ECOA
             local_shap_df = pd.DataFrame(local_records)
-            fcra_local_df = local_shap_df[~local_shap_df["feature"].isin(["int_rate"])].sort_values("shap_value", ascending=False).reset_index(drop=True)
+            fcra_local_df = local_shap_df[~local_shap_df["feature"].isin(["int_rate", "addr_state"])].sort_values("shap_value", ascending=False).reset_index(drop=True)
             top_4_shap = fcra_local_df.head(4)
 
             fig_local_shap = px.bar(
